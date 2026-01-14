@@ -1,0 +1,56 @@
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class AuthUIController : MonoBehaviour
+{    
+    [SerializeField] Button _startButton;
+    [SerializeField] AuthPanel _logInPanel;
+    [SerializeField] AuthPanel _registerPanel;
+
+    AuthPanel _currentPannel;
+
+
+    public void SetLogInPanelVisible(bool visible)
+    {
+        if (visible == true)
+        {
+            _currentPannel = _logInPanel;
+        }
+        _logInPanel.gameObject.SetActive(visible);
+    }
+
+    public void SetRegisterPanelVisible(bool visible)
+    {
+        if (visible == true)
+        {
+            _currentPannel = _registerPanel;
+        }
+        _registerPanel.gameObject.SetActive(visible);
+    }
+
+    public string GetEMail()
+    {
+        return _currentPannel.GetEmail();
+    }
+
+    public string GetPassword()
+    {
+        return _currentPannel.GetPassword();
+    }
+
+    public string GetNickName()
+    {        
+        return _currentPannel.GetNickName();
+    }
+
+    public void SetConfirmText(string text)
+    {
+        _currentPannel.SetConfirmText(text);
+    }
+
+    public void SetFailText(string text)
+    {
+        _currentPannel.SetFailText(text);
+    }
+}
