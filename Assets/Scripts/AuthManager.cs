@@ -83,11 +83,15 @@ public class AuthManager : MonoBehaviour
                 case AuthError.MissingPassword:
                     message = "패스워드를 입력해주세요.";
                     break;
-                case AuthError.WrongPassword:
-                    message = "패스워드가 틀렸습니다.";
+                case AuthError.WrongPassword:                    
+                case AuthError.InvalidCredential:
+                    message = "패스워드가 올바르지 않습니다.";
+                    break;
+                case AuthError.Failure:             
+                    message = "이메일 또는 패스워드가 올바르지 않습니다.";
                     break;
                 case AuthError.InvalidEmail:
-                    message = "이메일 형식이 올바르지 않습니다.";
+                    message = "이메일이 올바르지 않습니다.";
                     break;
                 case AuthError.UserNotFound:
                     message = "존재하지 않는 계정입니다.";
@@ -96,7 +100,7 @@ public class AuthManager : MonoBehaviour
                     message = "로그인 오류 발생. 관리자에게 문의해주세요.";
                     break;
             }
-
+            Debug.Log($"로그인 실패. 에러코드 : {errorCode.ToString()}");
             _authUIController.SetFailText(message);
 
         }
