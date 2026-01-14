@@ -78,3 +78,9 @@ crashlytics-build.properties
 Assets/IgnoredAssets/**
 !Assets/IgnoredAssets/**/*.meta
 !Assets/IgnoredAssets.meta
+
+# Firebase config
+Assets/**/google-services.json
+Assets/**/GoogleService-Info.plist
+**/serviceAccountKey.json
+**/firebase-config.json
