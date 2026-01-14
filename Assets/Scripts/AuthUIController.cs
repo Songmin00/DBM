@@ -7,9 +7,9 @@ public class AuthUIController : MonoBehaviour
     [SerializeField] Button _startButton;
     [SerializeField] AuthPanel _logInPanel;
     [SerializeField] AuthPanel _registerPanel;
-
+    
     AuthPanel _currentPannel;
-
+    
 
     public void SetLogInPanelVisible(bool visible)
     {
@@ -27,6 +27,11 @@ public class AuthUIController : MonoBehaviour
             _currentPannel = _registerPanel;
         }
         _registerPanel.gameObject.SetActive(visible);
+    }
+
+    public void SetStartButtonAvailable(bool available)
+    {        
+        _startButton.interactable = available;
     }
 
     public string GetEMail()

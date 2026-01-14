@@ -37,6 +37,14 @@ public class AuthManager : MonoBehaviour
         });
     }
 
+    private void Start()
+    {
+        if (SaveManager.Instance.User == null)
+        {
+            _authUIController.SetStartButtonAvailable(false);
+        }
+    }
+
     public void Login()
     {
         StartCoroutine(LogInRoutine());
@@ -94,7 +102,10 @@ public class AuthManager : MonoBehaviour
         else
         {
             User = logInTask.Result.User;
+            SaveManager.Instance.SetUserData();
             _authUIController.SetConfirmText($"환영합니다, {User.DisplayName} 님");            
+            _authUIController.SetStartButtonAvailable(true);
+            SaveManager.Instance.LoadFromDB();
         }
     }
 
@@ -185,8 +196,11 @@ public class AuthManager : MonoBehaviour
                     _authUIController.SetFailText("닉네임 설정 실패");                    
                 }
                 else  //파이어베이스 기본값은 회원가입 성공하면 자동 로그인 처리
-                {                    
+                {
+                    SaveManager.Instance.SetUserData();
                     _authUIController.SetConfirmText($"회원가입 완료. 반갑습니다 {User.DisplayName} 님");                    
+                    _authUIController.SetStartButtonAvailable(true);
+                    SaveManager.Instance.LoadFromDB();
                 }
             }
         }
