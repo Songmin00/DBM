@@ -214,19 +214,5 @@ public class AuthManager : MonoBehaviour
         if (!pw.Any(char.IsUpper)) return false;
         if (!pw.Any(char.IsDigit)) return false;
         return true;
-    }
-
-    public void OnGameStartButtonClick()
-    {
-        StartCoroutine(EnterLobbyRoutine());
-    }
-
-    IEnumerator EnterLobbyRoutine()
-    {
-        NetworkManager.Instance.JoinLobby();
-
-        yield return new WaitUntil(() => NetworkManager.Instance.IsJoinedLobby);
-
-        SceneManager.LoadScene("LobbyScene");
-    }
+    }    
 }

@@ -1,5 +1,6 @@
-using TMPro;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class AuthUIController : MonoBehaviour
@@ -57,5 +58,19 @@ public class AuthUIController : MonoBehaviour
     public void SetFailText(string text)
     {
         _currentPannel.SetFailText(text);
+    }
+
+    public void OnGameStartButtonClick()
+    {
+        StartCoroutine(EnterLobbyRoutine());
+    }
+
+    IEnumerator EnterLobbyRoutine()
+    {
+        NetworkManager.Instance.JoinLobby();
+
+        yield return new WaitUntil(() => NetworkManager.Instance.IsJoinedLobby);
+
+        SceneManager.LoadScene("LobbyScene");
     }
 }
