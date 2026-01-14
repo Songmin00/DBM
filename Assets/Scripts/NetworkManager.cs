@@ -4,12 +4,14 @@ using UnityEngine.SceneManagement;
 
 public class NetworkManager : Pungleton<NetworkManager>
 {
+    public bool IsServerConnected { get; private set; }
     public bool IsJoinedLobby { get; private set; }
 
 
     protected override void Awake()
     {
         base.Awake();
+        IsServerConnected = false;
         IsJoinedLobby = false;
         PhotonNetwork.AutomaticallySyncScene = true;
         ConnectToServer();
@@ -26,6 +28,7 @@ public class NetworkManager : Pungleton<NetworkManager>
     public override void OnConnectedToMaster()
     {
         Debug.Log("서버 연결 완료");        
+        IsServerConnected = true;
     }
 
     public void JoinLobby()
