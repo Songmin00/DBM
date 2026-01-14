@@ -6,6 +6,7 @@ using System.Collections;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 public class AuthManager : MonoBehaviour
@@ -101,7 +102,7 @@ public class AuthManager : MonoBehaviour
         }
         else
         {
-            User = logInTask.Result.User;
+            User = logInTask.Result.User;            
             SaveManager.Instance.SetUserData();
             _authUIController.SetConfirmText($"환영합니다, {User.DisplayName} 님");            
             _authUIController.SetStartButtonAvailable(true);
@@ -197,7 +198,7 @@ public class AuthManager : MonoBehaviour
                 }
                 else  //파이어베이스 기본값은 회원가입 성공하면 자동 로그인 처리
                 {
-                    SaveManager.Instance.SetUserData();
+                    SaveManager.Instance.SetUserData();                    
                     _authUIController.SetConfirmText($"회원가입 완료. 반갑습니다 {User.DisplayName} 님");                    
                     _authUIController.SetStartButtonAvailable(true);
                     SaveManager.Instance.LoadFromDB();
@@ -215,4 +216,17 @@ public class AuthManager : MonoBehaviour
         return true;
     }
 
+    public void OnGameStartButtonClick()
+    {
+        StartCoroutine(EnterLobbyRoutine());
+    }
+
+    IEnumerator EnterLobbyRoutine()
+    {
+        NetworkManager.Instance.JoinLobby();
+
+        yield return new WaitUntil(() => NetworkManager.Instance.IsJoinedLobby);
+
+        SceneManager.LoadScene("LobbyScene");
+    }
 }
