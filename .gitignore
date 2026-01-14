@@ -80,7 +80,16 @@ Assets/IgnoredAssets/**
 !Assets/IgnoredAssets.meta
 
 # Firebase config
+Assets/Firebase/**
+!Assets/Firebase/**/*.meta
+!Assets/Firebase.meta
+
+Assets/StreamingAssets/**
+!Assets/StreamingAssets/**/*.meta
+!Assets/StreamingAssets.meta
+
 Assets/**/google-services.json
 Assets/**/GoogleService-Info.plist
 **/serviceAccountKey.json
 **/firebase-config.json
+
