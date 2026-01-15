@@ -218,5 +218,10 @@ public class AuthManager : MonoBehaviour
         if (!pw.Any(char.IsUpper)) return false;
         if (!pw.Any(char.IsDigit)) return false;
         return true;
-    }    
+    }
+
+    public FirebaseUser GetUserInfo()
+    {
+        return User;
+    }
 }
