@@ -1,9 +1,7 @@
 using Firebase.Auth;
 using Firebase.Database;
-using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class SaveManager : Singleton<SaveManager>
 {

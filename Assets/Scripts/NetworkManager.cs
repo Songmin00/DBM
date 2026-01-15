@@ -1,6 +1,5 @@
 using UnityEngine;
 using Photon.Pun;
-using UnityEngine.SceneManagement;
 
 public class NetworkManager : Pungleton<NetworkManager>
 {
@@ -13,7 +12,10 @@ public class NetworkManager : Pungleton<NetworkManager>
         base.Awake();
         IsServerConnected = false;
         IsJoinedLobby = false;
+
         PhotonNetwork.AutomaticallySyncScene = true;
+
+
         ConnectToServer();
     }
 
@@ -41,4 +43,6 @@ public class NetworkManager : Pungleton<NetworkManager>
         Debug.Log("로비 연결 완료. 로비 씬으로 이동합니다.");
         IsJoinedLobby = true;
     }
+
+    
 }
