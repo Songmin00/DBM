@@ -16,7 +16,8 @@ public class AuthUIController : MonoBehaviour
 
     private void Awake()
     {
-        SetAuthButtonsVisible(false);
+        SetAuthButtonsAvailable(false);
+        SetStartButtonAvailable(false);
     }
 
     private void Start()
@@ -28,7 +29,7 @@ public class AuthUIController : MonoBehaviour
     {        
         yield return new WaitUntil(() => NetworkManager.Instance.IsServerConnected == true);
 
-        SetAuthButtonsVisible(true);
+        SetAuthButtonsAvailable(true);
     }
 
 
@@ -50,11 +51,10 @@ public class AuthUIController : MonoBehaviour
         _registerPanel.gameObject.SetActive(visible);
     }
 
-    public void SetAuthButtonsVisible(bool visible)
+    public void SetAuthButtonsAvailable(bool available)
     {
-        _logInButton.gameObject.SetActive(visible);
-        _registerButton.gameObject.SetActive(visible);
-        _startButton.gameObject.SetActive(visible);
+        _logInButton.interactable = available;
+        _registerButton.interactable = available;
     }
 
     public void SetStartButtonAvailable(bool available)
