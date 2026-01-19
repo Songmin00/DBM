@@ -1,4 +1,4 @@
 public enum PlayerType
 {
-    Killer, Survivor, Random
+    Killer, Survivor, None
 }
