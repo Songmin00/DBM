@@ -1,15 +1,20 @@
 using System;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 
 public class LobbyUIController : MonoBehaviour
 {
+    [Header("좌상단 플레이 패널")]
     [SerializeField] CanvasGroup _lobbyPanel;
     [SerializeField] CanvasGroup _roleSelectPanel;
     [SerializeField] float _fadeDuration = 0.25f;
     [SerializeField] float _emptyDuration = 0.1f;
     bool _isFading;
 
+    [Header("매칭 상태 알림 패널")]
+    [SerializeField] GameObject _matchingStatePanel;
+    [SerializeField] TextMeshProUGUI _matchingStateText;
 
     private void Awake()
     {
@@ -31,7 +36,20 @@ public class LobbyUIController : MonoBehaviour
     {
         ChangePanel(_roleSelectPanel, _lobbyPanel);
     }
-    
+
+    public void SetMatchingStateUIVisible(bool visible)
+    {
+        _matchingStatePanel.SetActive(visible);
+    }
+
+    public void SetMatchingStateText(string text)
+    {
+        _matchingStateText.text = text;
+    }
+
+
+
+
     private void ChangePanel(CanvasGroup panelToOff, CanvasGroup panelToOn)
     {
         if (_isFading)
@@ -98,4 +116,6 @@ public class LobbyUIController : MonoBehaviour
     {
         canvasGroup.alpha = visible ? 1f : 0f;        
     }
+
+
 }

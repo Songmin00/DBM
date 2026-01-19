@@ -11,9 +11,8 @@ using System.Collections;
 
 public class MatchingManager : MonoBehaviourPunCallbacks
 {
-    // [테스트용 UI 및 디버깅]
-    [SerializeField] GameObject TestUI;
-    [SerializeField] TextMeshProUGUI DebugingUI;
+    // [매칭 상태 확인용 UI]    
+    [SerializeField] LobbyUIController _lobbyUIController;
 
     // [매칭 설정]
     private int _requiredKiller = 1;
@@ -51,14 +50,15 @@ public class MatchingManager : MonoBehaviourPunCallbacks
     // 1. 매칭 서버(방) 접속 시작
     private void StartMatching()
     {
+        _lobbyUIController.SetMatchingStateUIVisible(true);
         if (PhotonNetwork.IsConnected)
         {
-            DebugingUI.text = "매칭룸 접속 중...";
+            _lobbyUIController.SetMatchingStateText("매칭룸 접속 중...");
             PhotonNetwork.JoinOrCreateRoom(_matchingRoomName, _matchingRoomOptions, TypedLobby.Default);
         }
         else
         {
-            DebugingUI.text = "네트워크 연결 확인 필요";
+            _lobbyUIController.SetMatchingStateText("네트워크 연결 확인 필요");
         }
     }
 
@@ -72,13 +72,12 @@ public class MatchingManager : MonoBehaviourPunCallbacks
             playerProp["PlayerType"] = playerType.ToString();
             PhotonNetwork.SetPlayerCustomProperties(playerProp);
 
-            DebugingUI.text = $"{playerType} 역할로 대기 중...";
+            _lobbyUIController.SetMatchingStateText($"{playerType} 역할로 대기 중...");
         }
         else
         {
-            // [인게임룸 입장 시] 게임 UI 활성화
-            TestUI.SetActive(true);
-            DebugingUI.text = "인게임 입장 완료!";
+            // 인게임룸 입장 시
+            _lobbyUIController.SetMatchingStateText("인게임 입장 완료!");
         }
     }
 
@@ -101,7 +100,7 @@ public class MatchingManager : MonoBehaviourPunCallbacks
         }
     }
 
-    // [매칭 판별 로직]
+    // 매칭 판별 로직
     private void CheckMatchable()
     {
         List<Player> killers = new List<Player>();
@@ -118,16 +117,16 @@ public class MatchingManager : MonoBehaviourPunCallbacks
 
         if (killers.Count >= _requiredKiller && survivors.Count >= _requiredSurvivor)
         {
-            DebugingUI.text = "매칭 성공! 방 정보 생성 중...";
+            _lobbyUIController.SetMatchingStateText("매칭 성공! 방 정보 생성 중...");
             ExecuteMatch(killers.Take(_requiredKiller).ToList(), survivors.Take(_requiredSurvivor).ToList());
         }
         else
         {
-            DebugingUI.text = $"대기 중 (K: {killers.Count}/{_requiredKiller}, S: {survivors.Count}/{_requiredSurvivor})";
+            _lobbyUIController.SetMatchingStateText($"대기 중 (킬러: {killers.Count}/{_requiredKiller}, 생존자: {survivors.Count}/{_requiredSurvivor})");
         }
     }
 
-    // [매칭 실행] 룸 프로퍼티에 이동할 방 이름과 인원 명단 배포
+    // 매칭 실행 시 : 룸 프로퍼티에 이동할 방 이름과 인원 명단 배포
     private void ExecuteMatch(List<Player> selectedKillers, List<Player> selectedSurvivors)
     {
         ExitGames.Client.Photon.Hashtable roomProp = new ExitGames.Client.Photon.Hashtable();
@@ -168,7 +167,7 @@ public class MatchingManager : MonoBehaviourPunCallbacks
         {
             // 이동할 방 이름을 저장하고 현재 매칭룸 탈퇴
             _inGameRoomName = PhotonNetwork.CurrentRoom.CustomProperties["InGameRoomName"].ToString();
-            DebugingUI.text = "매칭 확인됨. 인게임으로 이동합니다...";
+            _lobbyUIController.SetMatchingStateText("매칭 확인됨. 인게임으로 이동합니다...");
             PhotonNetwork.LeaveRoom();
         }
     }
@@ -180,7 +179,7 @@ public class MatchingManager : MonoBehaviourPunCallbacks
         // 방을 나갔을 때 바로 접속하지 않고, 마스터 서버로 복귀될 때까지 대기 메시지만 띄움
         if (!string.IsNullOrEmpty(_inGameRoomName))
         {
-            DebugingUI.text = "서버 복귀 중... 잠시만 기다려주세요.";
+            _lobbyUIController.SetMatchingStateText("서버 복귀 중... 잠시만 기다려주세요.");
         }
     }
 
@@ -190,7 +189,7 @@ public class MatchingManager : MonoBehaviourPunCallbacks
         // 이동할 목적지 방 이름이 저장되어 있다면, 이때가 접속의 최적기임!
         if (!string.IsNullOrEmpty(_inGameRoomName))
         {
-            DebugingUI.text = $"인게임 룸 접속 시도: {_inGameRoomName}";
+            _lobbyUIController.SetMatchingStateText($"인게임 룸 접속 시도: {_inGameRoomName}");
 
             // 룸 옵션 재설정 (OnLeftRoom에서 옵션 변수가 날아갈 수 있으므로 여기서 직접 선언하거나 전역변수 사용)
             RoomOptions options = new RoomOptions { MaxPlayers = (byte)_maxIngamePlayer, IsOpen = true, IsVisible = true };
@@ -206,7 +205,8 @@ public class MatchingManager : MonoBehaviourPunCallbacks
     // 7. 만약 입장 실패 시 에러 로그 확인용
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
-        DebugingUI.text = $"입장 실패: {message}";
+        _lobbyUIController.SetMatchingStateUIVisible(false);
+
         // 실패했다면 여기서 로비화면으로 보내기.
     }
 }
