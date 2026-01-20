@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LobbyUIController : MonoBehaviour
 {
@@ -15,6 +16,10 @@ public class LobbyUIController : MonoBehaviour
     [Header("매칭 상태 알림 패널")]
     [SerializeField] GameObject _matchingStatePanel;
     [SerializeField] TextMeshProUGUI _matchingStateText;
+    [SerializeField] Button _playButton;
+    [SerializeField] Button _killerPlayButton;
+    [SerializeField] Button _survivorPlayButton;
+    [SerializeField] GameObject _cancelButton;
 
     private void Awake()
     {
@@ -37,9 +42,13 @@ public class LobbyUIController : MonoBehaviour
         ChangePanel(_roleSelectPanel, _lobbyPanel);
     }
 
-    public void SetMatchingStateUIVisible(bool visible)
+    public void SetMatchingUIWhileMatching(bool isMatching)
     {
-        _matchingStatePanel.SetActive(visible);
+        _matchingStatePanel.SetActive(isMatching);
+        _cancelButton.SetActive(isMatching);
+        _playButton.interactable = !isMatching;
+        _killerPlayButton.interactable = !isMatching;
+        _survivorPlayButton.interactable = !isMatching;
     }
 
     public void SetMatchingStateText(string text)

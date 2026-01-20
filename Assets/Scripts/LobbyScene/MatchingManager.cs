@@ -6,6 +6,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 
 
@@ -45,12 +46,33 @@ public class MatchingManager : MonoBehaviourPunCallbacks
         playerType = PlayerType.Survivor;
         StartMatching();
     }
+
+    
+    public void OnCancelButtonClick()
+    {
+        // 매칭 취소 로직
+        if (PhotonNetwork.InRoom)
+        {
+            // 매칭 중이었던 정보를 초기화
+            _inGameRoomName = null;
+
+            _lobbyUIController.SetMatchingStateText("매칭 취소 중...");
+
+            // 현재 방(매칭룸)에서 나감
+            PhotonNetwork.LeaveRoom();
+        }
+
+        // UI 닫기
+        _lobbyUIController.SetMatchingUIWhileMatching(false);
+    }
+
+    
     #endregion
 
     // 1. 매칭 서버(방) 접속 시작
     private void StartMatching()
     {
-        _lobbyUIController.SetMatchingStateUIVisible(true);
+        _lobbyUIController.SetMatchingUIWhileMatching(true);
         if (PhotonNetwork.IsConnected)
         {
             _lobbyUIController.SetMatchingStateText("매칭룸 접속 중...");
@@ -78,6 +100,7 @@ public class MatchingManager : MonoBehaviourPunCallbacks
         {
             // 인게임룸 입장 시
             _lobbyUIController.SetMatchingStateText("인게임 입장 완료!");
+            SceneManager.LoadScene("InGameScene");
         }
     }
 
@@ -172,14 +195,19 @@ public class MatchingManager : MonoBehaviourPunCallbacks
         }
     }
 
-    
-    // 5. 매칭룸을 완전히 나갔을 때 실행
+
+    // 5. 매칭룸을 완전히 나갔을 때 실행    
     public override void OnLeftRoom()
     {
-        // 방을 나갔을 때 바로 접속하지 않고, 마스터 서버로 복귀될 때까지 대기 메시지만 띄움
+        // 취소 버튼을 눌러서 나가는 경우 _inGameRoomName이 null임
         if (!string.IsNullOrEmpty(_inGameRoomName))
         {
             _lobbyUIController.SetMatchingStateText("서버 복귀 중... 잠시만 기다려주세요.");
+        }
+        else
+        {
+            // 취소하여 나간 경우
+            _lobbyUIController.SetMatchingStateText("매칭이 취소되었습니다.");
         }
     }
 
@@ -205,7 +233,7 @@ public class MatchingManager : MonoBehaviourPunCallbacks
     // 7. 만약 입장 실패 시 에러 로그 확인용
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
-        _lobbyUIController.SetMatchingStateUIVisible(false);
+        _lobbyUIController.SetMatchingUIWhileMatching(false);
 
         // 실패했다면 여기서 로비화면으로 보내기.
     }
