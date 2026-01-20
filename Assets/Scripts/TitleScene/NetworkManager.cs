@@ -1,15 +1,17 @@
 using UnityEngine;
 using Photon.Pun;
 
-public class NetworkManager : Pungleton<NetworkManager>
+public class NetworkManager : MonoBehaviourPunCallbacks
 {
+    public static NetworkManager Instance { get; private set; }
+
     public bool IsServerConnected { get; private set; }
     public bool IsJoinedLobby { get; private set; }
 
 
-    protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
+        Instance = this;
         IsServerConnected = false;
         IsJoinedLobby = false;
 
