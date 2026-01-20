@@ -1787,7 +1787,7 @@ MonoBehaviour:
   _emptyDuration: 0.1
   _matchingStatePanel: {fileID: 1204688349}
   _matchingStateText: {fileID: 1757789570}
-  _playButton: {fileID: 0}
+  _playButton: {fileID: 948079329}
   _killerPlayButton: {fileID: 126870416}
   _survivorPlayButton: {fileID: 287254402}
   _cancelButton: {fileID: 2007825166}
