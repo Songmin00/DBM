@@ -16,9 +16,9 @@ public class MatchingManager : MonoBehaviourPunCallbacks
     [SerializeField] LobbyUIController _lobbyUIController;
 
     // [매칭 설정]
-    private int _requiredKiller = 1;
-    private int _requiredSurvivor = 2;
-    private int _maxIngamePlayer = 3;
+    [SerializeField] private int _requiredKiller = 1;
+    [SerializeField] private int _requiredSurvivor = 2;
+    [SerializeField] private int _maxIngamePlayer = 3;
 
     private const string _matchingRoomName = "MatchingRoom";
     private string _inGameRoomName; // 매칭 성공 시 이동할 방 이름 저장용
