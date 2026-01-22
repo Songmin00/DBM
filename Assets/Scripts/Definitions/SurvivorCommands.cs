@@ -29,19 +29,7 @@ public class SitCommand : ICommand //앉기
     }
 }
 
-public class FixGeneratorCommand : ICommand //발전기 수리
-{
-    SurvivorController _survivorController;
-    public FixGeneratorCommand(SurvivorController controller)
-    {
-        _survivorController = controller;
-    }
 
-    public void Execute()
-    {
-
-    }
-}
 
 public class DownPanelCommand : ICommand //판자 내리기
 {
@@ -57,10 +45,10 @@ public class DownPanelCommand : ICommand //판자 내리기
     }
 }
 
-public class HealCommand : ICommand //생존자 치료
+public class InteractCommand : ICommand //수리, 치료, 구출 통합
 {
     SurvivorController _survivorController;
-    public HealCommand(SurvivorController controller)
+    public InteractCommand(SurvivorController controller)
     {
         _survivorController = controller;
     }
@@ -71,19 +59,6 @@ public class HealCommand : ICommand //생존자 치료
     }
 }
 
-public class ResqueCommand : ICommand //생존자 구출
-{
-    SurvivorController _survivorController;
-    public ResqueCommand(SurvivorController controller)
-    {
-        _survivorController = controller;
-    }
-
-    public void Execute()
-    {
-
-    }
-}
 
 public class SkillCheckCommand : ICommand //미니게임 스킬 체크
 {
