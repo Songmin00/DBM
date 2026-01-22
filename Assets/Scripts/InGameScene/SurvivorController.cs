@@ -13,22 +13,7 @@ public class SurvivorController : CharacterController
 
     }
 
-    public void FixGenerator() //발전기 수리
-    {
-
-    }
-
     public void DownPanel() //판자 내리기
-    {
-
-    }
-
-    public void Heal() //생존자 치료
-    {
-
-    }
-
-    public void Resque() //생존자 구출
     {
 
     }
@@ -37,5 +22,27 @@ public class SurvivorController : CharacterController
     {
 
     }
+
+    public void Interact()
+    {
+
+    }
+
+
+    private void FixGenerator() //발전기 수리
+    {
+
+    }
+
+
+    private void Heal() //생존자 치료
+    {
+
+    }
+
+    private void Resque() //생존자 구출
+    {
+
+    }    
 
 }
