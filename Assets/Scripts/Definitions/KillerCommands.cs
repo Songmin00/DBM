@@ -29,11 +29,11 @@ public class LungeAttackCommand : ICommand //대쉬 공격
     }
 }
 
-public class KickPanelAttackCommand : ICommand //판자 부수기
+public class KickPanelCommand : ICommand //판자 부수기
 {
     KillerController _controller;
 
-    public KickPanelAttackCommand(KillerController characterController)
+    public KickPanelCommand(KillerController characterController)
     {
         _controller = characterController;
     }
@@ -44,11 +44,11 @@ public class KickPanelAttackCommand : ICommand //판자 부수기
     }
 }
 
-public class KickGeneratorAttackCommand : ICommand //발전기 부수기
+public class KickGeneratorCommand : ICommand //발전기 부수기
 {
     KillerController _controller;
 
-    public KickGeneratorAttackCommand(KillerController characterController)
+    public KickGeneratorCommand(KillerController characterController)
     {
         _controller = characterController;
     }
@@ -59,11 +59,11 @@ public class KickGeneratorAttackCommand : ICommand //발전기 부수기
     }
 }      
        
-public class LiftAttackCommand : ICommand //쓰러진 생존자 들기
+public class LiftCommand : ICommand //쓰러진 생존자 들기
 {
     KillerController _controller;
 
-    public LiftAttackCommand(KillerController characterController)
+    public LiftCommand(KillerController characterController)
     {
         _controller = characterController;
     }
@@ -74,11 +74,11 @@ public class LiftAttackCommand : ICommand //쓰러진 생존자 들기
     }
 }      
        
-public class DropAttackCommand : ICommand //들고 있는 생존자 내려놓기
+public class DropCommand : ICommand //들고 있는 생존자 내려놓기
 {
     KillerController _controller;
 
-    public DropAttackCommand(KillerController characterController)
+    public DropCommand(KillerController characterController)
     {
         _controller = characterController;
     }
