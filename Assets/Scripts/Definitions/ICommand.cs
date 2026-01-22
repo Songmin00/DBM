@@ -41,3 +41,18 @@ public class LookCommand : ICommand
         _controller.Look(_input);
     }
 }
+public class VaultCommand : ICommand
+{
+    CharacterController _controller;    
+
+    public VaultCommand(CharacterController controller)
+    {
+        _controller = controller;        
+    }
+
+    public void Execute()
+    {
+        _controller.Vault();
+    }
+}
+
