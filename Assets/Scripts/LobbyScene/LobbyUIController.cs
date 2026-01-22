@@ -6,12 +6,24 @@ using UnityEngine.UI;
 
 public class LobbyUIController : MonoBehaviour
 {
+    [Header("UI 교체 연출 소요 시간")]
+    [SerializeField] float _fadeDuration = 0.25f;
+    [SerializeField] float _emptyDuration = 0.1f;
+
     [Header("좌상단 플레이 패널")]
     [SerializeField] CanvasGroup _lobbyPanel;
     [SerializeField] CanvasGroup _roleSelectPanel;
-    [SerializeField] float _fadeDuration = 0.25f;
-    [SerializeField] float _emptyDuration = 0.1f;
+    
     bool _isFading;
+
+    [Header("캐릭터 선택 버튼 패널 상위 오브젝트")]
+    [SerializeField] CanvasGroup _killerSelectObject;
+    [SerializeField] CanvasGroup _survivorSelectObject;
+
+    [Header("캐릭터 선택 버튼 패널")]
+    [SerializeField] CharacterSelectPanel _killerSelectPanel;
+    [SerializeField] CharacterSelectPanel _survivorSelectPanel;
+
 
     [Header("매칭 상태 알림 패널")]
     [SerializeField] GameObject _matchingStatePanel;
@@ -26,8 +38,16 @@ public class LobbyUIController : MonoBehaviour
         _isFading = false;
         SetPanelAlpha(_lobbyPanel, true);
         SetPanelAlpha(_roleSelectPanel, false);
+
+        SetPanelAlpha(_killerSelectObject, false);
+        SetPanelAlpha(_survivorSelectObject, false);
+        
         SetPanelInteract(_lobbyPanel, true);
         SetPanelInteract(_roleSelectPanel, false);
+
+        SetPanelInteract(_killerSelectObject, false);
+        SetPanelInteract(_survivorSelectObject, false);
+
         _lobbyPanel.gameObject.SetActive(true);
         _roleSelectPanel.gameObject.SetActive(true);
     }
@@ -56,7 +76,27 @@ public class LobbyUIController : MonoBehaviour
         _matchingStateText.text = text;
     }
 
+    public void SetKillerSelectUI()
+    {
+        ChangePanel(_roleSelectPanel, _killerSelectObject);
+    }
+    public void SetSurvivorSelectUI()
+    {
+        ChangePanel(_roleSelectPanel, _survivorSelectObject);
+    }
 
+
+
+    public void SetReturnUIByKiller()
+    {
+        _killerSelectPanel.CancelSelect();
+        ChangePanel(_killerSelectObject, _roleSelectPanel);
+    }
+    public void SetReturnUIBySurvivor()
+    {
+        _survivorSelectPanel.CancelSelect();
+        ChangePanel(_survivorSelectObject, _roleSelectPanel);
+    }
 
 
     private void ChangePanel(CanvasGroup panelToOff, CanvasGroup panelToOn)

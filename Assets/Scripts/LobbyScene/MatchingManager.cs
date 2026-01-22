@@ -20,10 +20,11 @@ public class MatchingManager : MonoBehaviourPunCallbacks
     [SerializeField] private int _requiredSurvivor = 2;
     [SerializeField] private int _maxIngamePlayer = 3;
 
+
     private const string _matchingRoomName = "MatchingRoom";
     private string _inGameRoomName; // 매칭 성공 시 이동할 방 이름 저장용
 
-    public PlayerType playerType { get; private set; } = PlayerType.None;
+    public PlayerType PlayerType { get; private set; } = PlayerType.None;
 
     // [룸 옵션 설정]
     private RoomOptions _matchingRoomOptions = new RoomOptions { MaxPlayers = 50, IsOpen = true, IsVisible = false };
@@ -37,14 +38,31 @@ public class MatchingManager : MonoBehaviourPunCallbacks
     #region 버튼 연결용 퍼블릭 함수
     public void OnKillerButtonClick()
     {
-        playerType = PlayerType.Killer;
-        StartMatching();
+        PlayerType = PlayerType.Killer; //플레이어 타입 킬러로 설정
+        CharacterStateManager.Instance.SetPlayerType(PlayerType); //인게임으로 가져가기 위해 따로 전달        
+        _lobbyUIController.SetKillerSelectUI();
     }
 
     public void OnSurvivorButtonClick()
     {
-        playerType = PlayerType.Survivor;
-        StartMatching();
+        PlayerType = PlayerType.Survivor; //플레이어 타입 생존자로 설정
+        CharacterStateManager.Instance.SetPlayerType(PlayerType); //인게임으로 가져가기 위해 따로 전달     
+        _lobbyUIController.SetSurvivorSelectUI();
+    }
+
+    public void OnKillerSelectReturnButtonClick() //킬러 캐릭터 선택창의 돌아가기 버튼에 연결
+    {
+        _lobbyUIController.SetReturnUIByKiller();
+    }
+
+    public void OnSurvivorSelectCancelButtonClick() //생존자 캐릭터 선택창의 돌아가기 버튼에 연결
+    {
+        _lobbyUIController.SetReturnUIBySurvivor();
+    }
+
+    public void OnMatchingStartButtonClick()
+    {
+        StartMatching(); //매칭 시작
     }
 
     
@@ -91,10 +109,10 @@ public class MatchingManager : MonoBehaviourPunCallbacks
         {
             // [매칭룸 입장 시] 자신의 역할을 프로퍼티에 업로드
             ExitGames.Client.Photon.Hashtable playerProp = new ExitGames.Client.Photon.Hashtable();
-            playerProp["PlayerType"] = playerType.ToString();
+            playerProp["PlayerType"] = PlayerType.ToString();
             PhotonNetwork.SetPlayerCustomProperties(playerProp);
 
-            _lobbyUIController.SetMatchingStateText($"{playerType} 역할로 대기 중...");
+            _lobbyUIController.SetMatchingStateText($"{PlayerType} 역할로 대기 중...");
         }
         else
         {
