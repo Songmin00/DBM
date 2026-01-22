@@ -1,19 +1,19 @@
 using UnityEngine;
+using Photon.Pun;
 
-public class CharacterController : MonoBehaviour
+public class CharacterController
 {
     protected GameObject _character;
     protected Rigidbody _rb;
+    public bool IsMine => _character.GetPhotonView().IsMine;
 
     protected float _moveSpeed = 4;
-    private void Awake()
-    {
-        _rb = _character.GetComponent<Rigidbody>();
-    }
+    
 
     public void SetCharacterObject(GameObject character)
     {
         _character = character;
+        _rb = _character.GetComponent<Rigidbody>();
     }
 
     public virtual void Move(Vector2 input) //공용 이동 로직
