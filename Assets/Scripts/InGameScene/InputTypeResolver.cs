@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Windows;
 
 // 현재 캐릭터가 킬러인지 생존자인지에 따라 입력 의도를 구분해서 알맞은 커맨드 반환하는 역할.
-public class InputResolver : MonoBehaviour
+public class InputTypeResolver : MonoBehaviour
 {
     private PlayerType _inputType;
     private KillerController _killerController;
@@ -72,7 +72,7 @@ public class InputResolver : MonoBehaviour
 
 
             case PlayerType.Survivor:
-                return new InteractCommand(_survivorController);
+                //return new InteractCommand(_survivorController);
 
             default:
                 Debug.Log("잘못된 플레이어 타입 설정 : None");
@@ -89,7 +89,7 @@ public class InputResolver : MonoBehaviour
 
 
             case PlayerType.Survivor:
-                return new InteractCommand(_survivorController); //이거 아이템 사용으로 바꿔주기
+                //return new InteractCommand(_survivorController); //이거 아이템 사용으로 바꿔주기
 
             default:
                 Debug.Log("잘못된 플레이어 타입 설정 : None");
@@ -106,7 +106,7 @@ public class InputResolver : MonoBehaviour
 
 
             case PlayerType.Survivor:
-                return new InteractCommand(_survivorController); //이거 아이템 사용으로 바꿔주기
+                //return new InteractCommand(_survivorController); //이거 아이템 사용으로 바꿔주기
 
             default:
                 Debug.Log("잘못된 플레이어 타입 설정 : None");
