@@ -23,26 +23,25 @@ public class SurvivorController : CharacterController
 
     }
 
-    public void Interact()
+    public void FixGenerator() //발전기 수리
     {
 
     }
 
 
-    private void FixGenerator() //발전기 수리
+    public void Heal() //생존자 치료
     {
 
     }
 
-
-    private void Heal() //생존자 치료
+    public void Resque() //생존자 구출
     {
 
     }
 
-    private void Resque() //생존자 구출
+    public void UseItem()
     {
 
-    }    
+    }
 
 }

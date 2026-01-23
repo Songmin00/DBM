@@ -45,10 +45,36 @@ public class DownPanelCommand : ICommand //판자 내리기
     }
 }
 
-public class InteractCommand : ICommand //수리, 치료, 구출 통합
+public class FixGeneratorCommand : ICommand //수리
 {
     SurvivorController _survivorController;
-    public InteractCommand(SurvivorController controller)
+    public FixGeneratorCommand(SurvivorController controller)
+    {
+        _survivorController = controller;
+    }
+
+    public void Execute()
+    {
+
+    }
+}
+public class HealCommand : ICommand //치료
+{
+    SurvivorController _survivorController;
+    public HealCommand(SurvivorController controller)
+    {
+        _survivorController = controller;
+    }
+
+    public void Execute()
+    {
+
+    }
+}
+public class ResquerCommand : ICommand //구출
+{
+    SurvivorController _survivorController;
+    public ResquerCommand(SurvivorController controller)
     {
         _survivorController = controller;
     }
@@ -59,11 +85,23 @@ public class InteractCommand : ICommand //수리, 치료, 구출 통합
     }
 }
 
-
 public class SkillCheckCommand : ICommand //미니게임 스킬 체크
 {
     SurvivorController _survivorController;
     public SkillCheckCommand(SurvivorController controller)
+    {
+        _survivorController = controller;
+    }
+
+    public void Execute()
+    {
+
+    }
+}
+public class UseItemCommand : ICommand //아이템 사용
+{
+    SurvivorController _survivorController;
+    public UseItemCommand(SurvivorController controller)
     {
         _survivorController = controller;
     }
