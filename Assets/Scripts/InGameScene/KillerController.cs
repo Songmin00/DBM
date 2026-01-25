@@ -1,7 +1,7 @@
 using UnityEngine;
 
 //킬러가 가지고 있는 공통 액션만 정의. 각각 특수능력은 KillerAbility로.
-public class KillerController : CharacterController
+public class KillerController : CharacterControllerBase
 {
     public void Attack() //단거리 공격
     {
