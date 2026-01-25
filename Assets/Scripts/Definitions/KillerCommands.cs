@@ -88,3 +88,18 @@ public class DropCommand : ICommand //들고 있는 생존자 내려놓기
 
     }
 }
+
+public class CatchCommand : ICommand
+{
+    KillerController _controller;
+
+    public CatchCommand(KillerController characterController)
+    {
+        _controller = characterController;
+    }
+
+    public void Execute()
+    {
+
+    }
+}
