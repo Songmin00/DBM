@@ -9,7 +9,8 @@ public class InGameManager : MonoBehaviourPunCallbacks
 
     GameObject _playerPrefab;
     Vector3 _spawnPos = new Vector3(0, 1.5f, 0);
-
+    GameObject _localInstance;
+    public bool isReady { get; private set; } = false;
 
     private void Start() //씬이 너무 빨리 불러와져서 start가 룸 들어가기 전에 호출되는 문제가 있음
     {
@@ -26,7 +27,8 @@ public class InGameManager : MonoBehaviourPunCallbacks
     private IEnumerator SpawnPlayerWhenConnected()
     {
         yield return new WaitUntil(() => PhotonNetwork.InRoom);
-        PhotonNetwork.Instantiate(_playerPrefab.name, _spawnPos, Quaternion.identity);
+        _localInstance = PhotonNetwork.Instantiate(_playerPrefab.name, _spawnPos, Quaternion.identity);
+        isReady = true;
     }
 
     public override void OnLeftRoom()
@@ -37,5 +39,10 @@ public class InGameManager : MonoBehaviourPunCallbacks
     public void LeaveRoom()
     {
         PhotonNetwork.LeaveRoom();
+    }
+
+    public GameObject GetCharacterObject()
+    {
+        return _localInstance;
     }
 }
