@@ -3436,8 +3436,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MatchingManager
   _lobbyUIController: {fileID: 1318716183}
-  _requiredKiller: 1
-  _requiredSurvivor: 0
+  _requiredKiller: 0
+  _requiredSurvivor: 1
   _maxIngamePlayer: 1
 --- !u!4 &1601973086
 Transform:
