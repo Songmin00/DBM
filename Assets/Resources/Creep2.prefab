@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2643519478900101510}
   - component: {fileID: 6632025825121200315}
+  - component: {fileID: 1630629233041865475}
+  - component: {fileID: 4832955739591252112}
   m_Layer: 0
   m_Name: Creep2
   m_TagString: Untagged
@@ -57,6 +59,40 @@ LODGroup:
     renderers:
     - renderer: {fileID: 5530727753237078516}
   m_Enabled: 1
+--- !u!114 &1630629233041865475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6703933247444291938}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76b4de1b5d33e1646b175cceaaef44e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KillerController
+--- !u!114 &4832955739591252112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6703933247444291938}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PhotonUnityNetworking::Photon.Pun.PhotonView
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1001 &3453736078152326499
 PrefabInstance:
   m_ObjectHideFlags: 0

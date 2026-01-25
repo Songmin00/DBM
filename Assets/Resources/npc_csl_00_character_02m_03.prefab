@@ -1090,6 +1090,7 @@ GameObject:
   - component: {fileID: -2513621274943209553}
   - component: {fileID: -998936689935645312}
   - component: {fileID: -2395815988671187567}
+  - component: {fileID: -3682815649071950840}
   m_Layer: 0
   m_Name: npc_csl_00_character_02m_03
   m_TagString: Untagged
@@ -1229,7 +1230,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
-  m_Constraints: 0
+  m_Constraints: 80
   m_CollisionDetection: 1
 --- !u!136 &-2513621274943209553
 CapsuleCollider:
@@ -1293,6 +1294,18 @@ MonoBehaviour:
   ShowParameterInspector: 1
   m_SynchronizeParameters: []
   m_SynchronizeLayers: []
+--- !u!114 &-3682815649071950840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1430886184436382092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8936a8e0ba8fed5478760ca541b17a67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SurvivorController
 --- !u!1 &1450471497623237830
 GameObject:
   m_ObjectHideFlags: 0
