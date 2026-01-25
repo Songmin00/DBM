@@ -1,8 +1,14 @@
 using UnityEngine;
 
 //생존자 공용 액션을 정의. 경우에 따라 발전기 수리와 판자 내리기 등은 인터페이스를 통해 Interact()로 통합시킬 것.
-public class SurvivorController : CharacterController
+public class SurvivorController : CharacterControllerBase
 {
+    public override void Move(Vector2 input) //공용 이동 로직
+    {
+        base.Move(input);
+        Look(input);
+    }
+
     public void Run() //달리기
     {
 
