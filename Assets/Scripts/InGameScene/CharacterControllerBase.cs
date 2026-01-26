@@ -17,17 +17,7 @@ public class CharacterControllerBase : MonoBehaviour //개별 캐릭터 프리팹에 부착
 
     private void FixedUpdate()
     {
-        Vector3 currentVelocity = _rb.linearVelocity;
-
-        if (MoveInput == Vector2.zero) //입력 없으면 즉시 정지
-        {
-            _rb.linearVelocity = new Vector3(0, currentVelocity.y, 0);
-            return;
-        }
-        Vector3 dir = new Vector3(MoveInput.x, 0f, MoveInput.y);
-        Vector3 velocity = dir.normalized * _moveSpeed;
-
-        _rb.linearVelocity = new Vector3(velocity.x, 0f, velocity.z);
+        MoveRogic();
     }
 
 
@@ -51,5 +41,20 @@ public class CharacterControllerBase : MonoBehaviour //개별 캐릭터 프리팹에 부착
     public virtual void Vault() //공용 창틀 뛰어넘기 로직
     {
 
+    }
+
+    private void MoveRogic()
+    {
+        Vector3 currentVelocity = _rb.linearVelocity; // 정지시 중력 정상 반영을 위한 관성 값 저장
+
+        if (MoveInput == Vector2.zero) //입력 없으면 즉시 정지
+        {
+            _rb.linearVelocity = new Vector3(0, currentVelocity.y, 0);
+            return;
+        }
+        Vector3 dir = new Vector3(MoveInput.x, 0f, MoveInput.y);
+        Vector3 velocity = dir.normalized * _moveSpeed;
+
+        _rb.linearVelocity = new Vector3(velocity.x, 0f, velocity.z);
     }
 }
