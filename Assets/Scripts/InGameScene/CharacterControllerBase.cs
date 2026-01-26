@@ -10,12 +10,12 @@ public class CharacterControllerBase : MonoBehaviour //개별 캐릭터 프리팹에 부착
 
     public Vector2 MoveInput {  get; private set; }
 
-    private void Awake()
+    protected virtual void Awake()
     {
         _rb = GetComponent<Rigidbody>();
     }
 
-    private void FixedUpdate()
+    protected virtual void FixedUpdate()
     {
         MoveRogic();
     }
