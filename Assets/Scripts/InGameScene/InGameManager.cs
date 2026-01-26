@@ -1,11 +1,14 @@
-using System.Collections;
 using Photon.Pun;
+using System.Collections;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class InGameManager : MonoBehaviourPunCallbacks
 {
     public static InGameManager Instance;
+
+    [SerializeField] CinemachineCamera _camera;
 
     GameObject _playerPrefab;
     Vector3 _spawnPos = new Vector3(0, 1.5f, 0);
@@ -28,6 +31,11 @@ public class InGameManager : MonoBehaviourPunCallbacks
     {
         yield return new WaitUntil(() => PhotonNetwork.InRoom);
         _localInstance = PhotonNetwork.Instantiate(_playerPrefab.name, _spawnPos, Quaternion.identity);
+        if (CharacterStateManager.Instance.PlayerType == PlayerType.Survivor)
+        {
+            _camera.Follow = _localInstance.GetComponent<SurvivorController>().GetCameraAnchor();
+        }
+        
         isReady = true;
     }
 
