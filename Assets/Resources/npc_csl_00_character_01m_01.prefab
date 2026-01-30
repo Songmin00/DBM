@@ -4692,6 +4692,7 @@ GameObject:
   - component: {fileID: -6101769442397466049}
   - component: {fileID: -7396409924313214}
   - component: {fileID: -1794085005011781403}
+  - component: {fileID: -4528598846524136651}
   m_Layer: 0
   m_Name: npc_csl_00_character_01m_01
   m_TagString: Untagged
@@ -4904,6 +4905,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorController
   _cameraAnchor: {fileID: 7708368655170084925}
+  _interactManager: {fileID: -4528598846524136651}
+--- !u!114 &-4528598846524136651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4344479889537051052}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cc0d0e7f56857b4eaa32a6d6251463c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SurvivorInteractManager
 --- !u!1 &4411269373601893624
 GameObject:
   m_ObjectHideFlags: 0

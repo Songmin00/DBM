@@ -482,6 +482,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 800c7968b38a61941b1f05319e639e54, type: 3}
       insertIndex: -1
       addedObject: {fileID: -3335498860364698832}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 800c7968b38a61941b1f05319e639e54, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6234449137150489086}
   m_SourcePrefab: {fileID: 100100000, guid: 800c7968b38a61941b1f05319e639e54, type: 3}
 --- !u!4 &350717609705333805 stripped
 Transform:
@@ -682,6 +685,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorController
   _cameraAnchor: {fileID: 8458631639529878801}
+  _interactManager: {fileID: 6234449137150489086}
+--- !u!114 &6234449137150489086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 550485632688433402}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cc0d0e7f56857b4eaa32a6d6251463c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SurvivorInteractManager
 --- !u!137 &604938663234097977 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: -9004962196888533358, guid: 800c7968b38a61941b1f05319e639e54, type: 3}
