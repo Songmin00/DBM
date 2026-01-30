@@ -6,6 +6,14 @@ public interface ICommand //커맨드는 한 프레임짜리 행동을 정의하는 단위로 사용.
     void Execute();
 }
 
+public class NullCommand : ICommand
+{
+    public void Execute()
+    {
+        
+    }
+}
+
 
 //공용 이동 & 방향전환 커맨드 정의
 public class MoveCommand : ICommand
@@ -27,10 +35,10 @@ public class MoveCommand : ICommand
 
 public class LookCommand : ICommand
 {
-    CharacterControllerBase _controller;
+    KillerController _controller;
     Vector2 _input;
 
-    public LookCommand(CharacterControllerBase controller, Vector2 input)
+    public LookCommand(KillerController controller, Vector2 input)
     {
         _controller = controller;
         _input = input;
