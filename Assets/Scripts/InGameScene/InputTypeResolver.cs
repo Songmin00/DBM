@@ -51,10 +51,10 @@ public class InputTypeResolver
         switch (_inputType)
         {
             case PlayerType.Killer:
-                return new LookCommand(_killerController, input);
+                return _killerInputActionResolver.ResolveLook(input);
 
             case PlayerType.Survivor:
-                return null;
+                return _survivorInputActionResolver.ResoleveLook(input);
 
             default:
                 Debug.Log("잘못된 플레이어 타입 설정 : None");
@@ -79,22 +79,22 @@ public class InputTypeResolver
     //    }
     //}
 
-    //public ICommand OnLeftMouseHold()
-    //{
-    //    switch (_inputType)
-    //    {
-    //        case PlayerType.Killer:
-    //            return new LungeAttackCommand(_killerController);
+    public ICommand OnLeftMouseHold(bool isHold)
+    {
+        switch (_inputType)
+        {
+            case PlayerType.Killer:
+                return new LungeAttackCommand(_killerController);
 
 
-    //        case PlayerType.Survivor:
-    //            //return new InteractCommand(_survivorController);
+            case PlayerType.Survivor:
+            return new InteractCommand(_survivorController, isHold);
 
-    //        default:
-    //            Debug.Log("잘못된 플레이어 타입 설정 : None");
-    //            return null;
-    //    }
-    //}
+            default:
+                Debug.Log("잘못된 플레이어 타입 설정 : None");
+                return null;
+        }
+    }
 
     //public ICommand OnRightMouseClick()
     //{
