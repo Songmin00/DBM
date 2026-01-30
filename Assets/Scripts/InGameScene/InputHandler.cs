@@ -27,8 +27,16 @@ public class InputHandler : MonoBehaviourPunCallbacks
 
     private void Update()
     {        
+        if (_commands.Count == 0)
+        {
+            return;
+        }
         foreach (var command in _commands)
         {
+            if (command == null)
+            {
+                return;
+            }
             command.Execute();
         }
         _commands.Clear();
@@ -41,7 +49,7 @@ public class InputHandler : MonoBehaviourPunCallbacks
     }
 
     public void OnMousePointer(InputAction.CallbackContext ctx)
-    {        
+    {             
         Vector2 input = ctx.ReadValue<Vector2>();
         _commands.Add(_inputTypeResolver.OnMousePointer(input));        
     }
@@ -51,9 +59,16 @@ public class InputHandler : MonoBehaviourPunCallbacks
 
     }
 
-    public void OnLeftMouseHold()
+    public void OnLeftMouseHold(InputAction.CallbackContext ctx)
     {
-
+        if (ctx.started)
+        {
+            _commands.Add(_inputTypeResolver.OnLeftMouseHold(true));
+        }
+        else if (ctx.canceled)
+        {
+            _commands.Add(_inputTypeResolver.OnLeftMouseHold(false));
+        }
     }
 
     public void OnRightMouseClick()

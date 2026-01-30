@@ -14,5 +14,10 @@ public class KillerInputActionResolver
         return new MoveCommand(_killerController, input);
     }
 
-    
+    public ICommand ResolveLook(Vector2 input)
+    {
+        return new LookCommand(_killerController, input);
+    }
+
+
 }

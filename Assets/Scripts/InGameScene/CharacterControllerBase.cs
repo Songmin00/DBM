@@ -17,6 +17,10 @@ public class CharacterControllerBase : MonoBehaviour //개별 캐릭터 프리팹에 부착
 
     protected virtual void FixedUpdate()
     {
+        if (!IsMine)
+        {
+            return;
+        }
         MoveRogic();
     }
 
@@ -26,24 +30,13 @@ public class CharacterControllerBase : MonoBehaviour //개별 캐릭터 프리팹에 부착
         MoveInput = input;
     }
 
-    public virtual void Look(Vector2 direction) //공용 시점 이동 로직
-    {
-        if (direction == Vector2.zero)
-        {
-            return;
-        }
-        Vector3 dir = new Vector3(direction.x, 0f, direction.y);
-        Quaternion rot = Quaternion.LookRotation(dir);
-
-        _rb.MoveRotation(rot);
-    }
 
     public virtual void Vault() //공용 창틀 뛰어넘기 로직
     {
 
     }
 
-    private void MoveRogic()
+    protected virtual void MoveRogic()
     {
         Vector3 currentVelocity = _rb.linearVelocity; // 정지시 중력 정상 반영을 위한 관성 값 저장
 
@@ -53,8 +46,24 @@ public class CharacterControllerBase : MonoBehaviour //개별 캐릭터 프리팹에 부착
             return;
         }
         Vector3 dir = new Vector3(MoveInput.x, 0f, MoveInput.y);
+
+        Transform cam = Camera.main.transform;
+
+        Vector3 camForward = cam.forward;
+        camForward.y = 0f;
+        camForward.Normalize();
+
+        Vector3 camRight = cam.right;
+        camRight.y = 0f;
+        camRight.Normalize();
+
+        dir = camForward * MoveInput.y + camRight * MoveInput.x;
+
         Vector3 velocity = dir.normalized * _moveSpeed;
 
         _rb.linearVelocity = new Vector3(velocity.x, 0f, velocity.z);
+
+        Quaternion targetRot = Quaternion.LookRotation(dir, Vector3.up);
+        _rb.MoveRotation(targetRot);
     }
 }

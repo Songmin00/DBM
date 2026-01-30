@@ -13,4 +13,14 @@ public class SurvivorInputActionResolver
     {
         return new MoveCommand(_survivorController, input);
     }
+    
+    public ICommand ResoleveLook(Vector2 input)
+    {
+        return new NullCommand();
+    }
+
+    public ICommand ResolveInteract(bool interact)
+    {        
+        return new InteractCommand(_survivorController, interact);        
+    }
 }
