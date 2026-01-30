@@ -8,7 +8,8 @@ public class InGameManager : MonoBehaviourPunCallbacks
 {
     public static InGameManager Instance;
 
-    [SerializeField] CinemachineCamera _camera;
+    [SerializeField] CinemachineCamera _survivorCameraPrefab;
+    [SerializeField] CinemachineCamera _killerCameraPrefab;
 
     GameObject _playerPrefab;
     Vector3 _spawnPos = new Vector3(0, 1.5f, 0);
@@ -33,9 +34,17 @@ public class InGameManager : MonoBehaviourPunCallbacks
         _localInstance = PhotonNetwork.Instantiate(_playerPrefab.name, _spawnPos, Quaternion.identity);
         if (CharacterStateManager.Instance.PlayerType == PlayerType.Survivor)
         {
-            _camera.Follow = _localInstance.GetComponent<SurvivorController>().GetCameraAnchor();
+            CinemachineCamera cam = Instantiate(_survivorCameraPrefab);
+            cam.Follow = _localInstance.GetComponent<SurvivorController>().GetCameraAnchor();
+            cam.LookAt = _localInstance.GetComponent<SurvivorController>().GetCameraAnchor();
         }
-        
+        if (CharacterStateManager.Instance.PlayerType == PlayerType.Killer)
+        {
+            CinemachineCamera cam = Instantiate(_killerCameraPrefab);
+            cam.Follow = _localInstance.GetComponent<KillerController>().GetCameraAnchor();
+            cam.LookAt = _localInstance.GetComponent<KillerController>().GetCameraTarget();
+        }
+
         isReady = true;
     }
 
