@@ -111,3 +111,20 @@ public class UseItemCommand : ICommand //아이템 사용
 
     }
 }
+
+public class InteractCommand : ICommand
+{
+    SurvivorController _survivorController;
+    bool _interact;
+
+    public InteractCommand(SurvivorController controller, bool interact)
+    {
+        _survivorController = controller;
+        _interact = interact;
+    }
+
+    public void Execute()
+    {
+        _survivorController.Interact(_interact);
+    }
+}
