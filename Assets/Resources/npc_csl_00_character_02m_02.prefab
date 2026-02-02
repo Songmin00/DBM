@@ -7996,6 +7996,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13c07d6a0e5703743985b070daec1d53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorStateManager
+  healTime: 16
+  rescueTime: 1.5
 --- !u!1001 &3314161091946327985
 PrefabInstance:
   m_ObjectHideFlags: 0
