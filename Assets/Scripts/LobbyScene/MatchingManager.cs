@@ -118,7 +118,10 @@ public class MatchingManager : MonoBehaviourPunCallbacks
         {
             // 인게임룸 입장 시
             _lobbyUIController.SetMatchingStateText("인게임 입장 완료!");
-            SceneManager.LoadScene("InGameScene");
+            if (PhotonNetwork.IsMasterClient)
+            {
+                SceneManager.LoadScene("InGameScene");
+            }            
         }
     }
 
