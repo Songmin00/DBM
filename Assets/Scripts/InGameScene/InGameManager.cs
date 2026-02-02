@@ -1,5 +1,4 @@
 using Photon.Pun;
-using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -10,56 +9,103 @@ public class InGameManager : MonoBehaviourPunCallbacks
 
     [SerializeField] CinemachineCamera _survivorCameraPrefab;
     [SerializeField] CinemachineCamera _killerCameraPrefab;
+    [SerializeField] GameObject _generatorPrefab;
 
-    GameObject _playerPrefab;
-    Vector3 _spawnPos = new Vector3(0, 1.5f, 0);
-    GameObject _localInstance;
+    private GameObject _playerPrefab;
+    private GameObject _localInstance;
+    private Vector3 _spawnPos = new Vector3(0, 1.5f, 0);
+
     public bool isReady { get; private set; } = false;
 
-    private void Start() //씬이 너무 빨리 불러와져서 start가 룸 들어가기 전에 호출되는 문제가 있음
+    private void Awake()
     {
-        Instance = this;
-
-        _playerPrefab = CharacterStateManager.Instance.CharacterPrefab;
-
-        //if (PlayerManager.LocalPlayerInstance == null)
+        // 씬 전용 싱글톤
+        if (Instance != null)
         {
-            StartCoroutine(SpawnPlayerWhenConnected());
+            Destroy(gameObject);
+            return;
         }
+        Instance = this;
     }
 
-    private IEnumerator SpawnPlayerWhenConnected()
+    private void Start()
     {
+        StartCoroutine(SpawnRoutine());
+    }
+
+    private System.Collections.IEnumerator SpawnRoutine()
+    {
+        // Photon 룸 입장까지 대기
         yield return new WaitUntil(() => PhotonNetwork.InRoom);
-        _localInstance = PhotonNetwork.Instantiate(_playerPrefab.name, _spawnPos, Quaternion.identity);
+
+        Debug.Log("InGameManager Spawn Start");
+
+        // 캐릭터 프리팹
+        _playerPrefab = CharacterStateManager.Instance.CharacterPrefab;
+        if (_playerPrefab == null)
+        {
+            Debug.LogError("CharacterPrefab is null");
+            yield break;
+        }
+
+        // ===== 캐릭터 스폰 =====
+        _localInstance = PhotonNetwork.Instantiate(
+            _playerPrefab.name,
+            _spawnPos,
+            Quaternion.identity
+        );
+
+        Debug.Log("Player Spawned : " + _localInstance.name);
+
+        // ===== 카메라 스폰 =====
         if (CharacterStateManager.Instance.PlayerType == PlayerType.Survivor)
         {
             CinemachineCamera cam = Instantiate(_survivorCameraPrefab);
-            cam.Follow = _localInstance.GetComponent<SurvivorController>().GetCameraAnchor();
-            cam.LookAt = _localInstance.GetComponent<SurvivorController>().GetCameraAnchor();
+            SurvivorController sc = _localInstance.GetComponent<SurvivorController>();
+
+            cam.Follow = sc.GetCameraAnchor();
+            cam.LookAt = sc.GetCameraAnchor();
         }
-        if (CharacterStateManager.Instance.PlayerType == PlayerType.Killer)
+        else if (CharacterStateManager.Instance.PlayerType == PlayerType.Killer)
         {
             CinemachineCamera cam = Instantiate(_killerCameraPrefab);
-            cam.Follow = _localInstance.GetComponent<KillerController>().GetCameraAnchor();
-            cam.LookAt = _localInstance.GetComponent<KillerController>().GetCameraTarget();
+            KillerController kc = _localInstance.GetComponent<KillerController>();
+
+            cam.Follow = kc.GetCameraAnchor();
+            cam.LookAt = kc.GetCameraTarget();
+        }
+
+        // ===== 발전기 스폰 (마스터만) =====
+        if (PhotonNetwork.IsMasterClient)
+        {
+            SpawnGenerator();
         }
 
         isReady = true;
+        Debug.Log("InGameManager Ready");
+    }
+
+    private void SpawnGenerator()
+    {
+        PhotonNetwork.Instantiate(
+            _generatorPrefab.name,
+            new Vector3(10f, 0f, 10f),
+            Quaternion.identity
+        );
+    }
+
+    public GameObject GetCharacterObject()
+    {
+        return _localInstance;
     }
 
     public override void OnLeftRoom()
-    {
+    {        
         SceneManager.LoadScene("LobbyScene");
     }
 
     public void LeaveRoom()
     {
         PhotonNetwork.LeaveRoom();
-    }
-
-    public GameObject GetCharacterObject()
-    {
-        return _localInstance;
     }
 }
