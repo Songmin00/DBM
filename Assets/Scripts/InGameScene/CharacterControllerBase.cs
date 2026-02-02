@@ -1,54 +1,52 @@
 using UnityEngine;
 using Photon.Pun;
 
-public class CharacterControllerBase : MonoBehaviour //개별 캐릭터 프리팹에 부착
-{    
+public class CharacterControllerBase : MonoBehaviour
+{
     protected Rigidbody _rb;
     public bool IsMine => gameObject.GetPhotonView().IsMine;
 
-    protected float _moveSpeed = 4; //캐릭터 스탯 구현 후 받아오기
-
-    public Vector2 MoveInput {  get; private set; }
+    public float MoveSpeed { get; set; } = 4;
+    public Vector2 MoveInput { get; private set; }
 
     protected virtual void Awake()
     {
         _rb = GetComponent<Rigidbody>();
+
+        // 물리 회전 차단 (X, Z)
+        _rb.constraints = RigidbodyConstraints.FreezeRotationX
+                        | RigidbodyConstraints.FreezeRotationZ;
+
+        // 마찰로 인한 미세 회전 방지
+        _rb.angularDamping = 0f;
     }
 
     protected virtual void FixedUpdate()
     {
-        if (!IsMine)
-        {
-            return;
-        }
-        MoveRogic();
+        if (!IsMine) return;
+
+        // ★ 핵심: 외부 충돌로 인한 뱅글뱅글 회전 강제 차단
+        _rb.angularVelocity = Vector3.zero;
     }
 
-
-    public virtual void Move(Vector2 input) //공용 이동 로직
-    {        
+    public virtual void Move(Vector2 input)
+    {
         MoveInput = input;
     }
 
-
-    public virtual void Vault() //공용 창틀 뛰어넘기 로직
-    {
-
-    }
+    public virtual void Vault() { }
 
     protected virtual void MoveRogic()
     {
-        Vector3 currentVelocity = _rb.linearVelocity; // 정지시 중력 정상 반영을 위한 관성 값 저장
+        if (!IsMine) return;
 
-        if (MoveInput == Vector2.zero) //입력 없으면 즉시 정지
+        if (MoveInput == Vector2.zero)
         {
-            _rb.linearVelocity = new Vector3(0, currentVelocity.y, 0);
+            _rb.linearVelocity = new Vector3(0, _rb.linearVelocity.y, 0);
             return;
         }
-        Vector3 dir = new Vector3(MoveInput.x, 0f, MoveInput.y);
 
         Transform cam = Camera.main.transform;
-
         Vector3 camForward = cam.forward;
         camForward.y = 0f;
         camForward.Normalize();
@@ -57,13 +55,16 @@ public class CharacterControllerBase : MonoBehaviour //개별 캐릭터 프리팹에 부착
         camRight.y = 0f;
         camRight.Normalize();
 
-        dir = camForward * MoveInput.y + camRight * MoveInput.x;
+        Vector3 dir = camForward * MoveInput.y + camRight * MoveInput.x;
+        Vector3 velocity = dir.normalized * MoveSpeed;
 
-        Vector3 velocity = dir.normalized * _moveSpeed;
+        _rb.linearVelocity = new Vector3(velocity.x, _rb.linearVelocity.y, velocity.z);
 
-        _rb.linearVelocity = new Vector3(velocity.x, 0f, velocity.z);
-
-        Quaternion targetRot = Quaternion.LookRotation(dir, Vector3.up);
-        _rb.MoveRotation(targetRot);
+        // 생존자용: 이동 방향으로 즉시 회전
+        if (dir != Vector3.zero)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(dir, Vector3.up);
+            _rb.MoveRotation(targetRot);
+        }
     }
 }

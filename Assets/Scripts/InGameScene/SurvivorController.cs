@@ -1,124 +1,127 @@
+using Photon.Pun;
 using UnityEngine;
 
-//생존자 공용 액션을 정의. 경우에 따라 발전기 수리와 판자 내리기 등은 인터페이스를 통해 Interact()로 통합시킬 것.
-public class SurvivorController : CharacterControllerBase
+public class SurvivorController : CharacterControllerBase, IPunObservable
 {
     [SerializeField] Transform _cameraAnchor;
-    [SerializeField] SurvivorInteractManager _interactManager;
-    bool _isInteracting = false;
+    private SurvivorStateManager _stateManager;
+    private SurvivorInteractManager _interactManager;
+    private Animator _animator;
+    private CapsuleCollider _capsuleCollider;
+    private PhotonView _pv;
+    public PhotonView Pv => _pv;
+    private float _currentAnimSpeed = 0f;
 
     protected override void Awake()
     {
         base.Awake();
+        _pv = GetComponent<PhotonView>();
+        _stateManager = GetComponent<SurvivorStateManager>();
+        _interactManager = GetComponent<SurvivorInteractManager>();
+        _animator = GetComponent<Animator>();
+        _capsuleCollider = GetComponent<CapsuleCollider>();
 
-        if (_cameraAnchor == null)
-        {
-            _cameraAnchor = gameObject.transform.GetChild(0);
-        }
+        if (_cameraAnchor == null) _cameraAnchor = transform.GetChild(0);
     }
 
     protected override void FixedUpdate()
     {
-        if (_isInteracting)
-        {
-            return;
-        }
+        if (_pv == null || !_pv.IsMine) return;
+        base.FixedUpdate(); // 뱅글뱅글 방지
+        if (_stateManager != null && !_stateManager.CanMove()) return;
         MoveRogic();
     }
 
-    public Transform GetCameraAnchor()
+    public void SetMoveSpeed(float speed) => MoveSpeed = speed;
+
+    public void SetPhysical(bool enable)
     {
-        return _cameraAnchor;
+        if (_rb != null) _rb.isKinematic = !enable;
+        if (_capsuleCollider != null) _capsuleCollider.enabled = enable;
     }
 
-    public void Run() //달리기
+    public void Run(bool running)
     {
-
-    }
-    
-    public void Sit() //앉기
-    {
-
+        if (!_pv.IsMine || (_stateManager != null && (!_stateManager.CanMove() || _stateManager.IsSitting))) return;
+        SetMoveSpeed(running ? 6f : 4f);
     }
 
-    public void DownPanel() //판자 내리기
+    public void Sit(bool sit)
     {
-
+        if (!_pv.IsMine) return;
+        if (_stateManager != null) _stateManager.SetSitting(sit);
+        SetMoveSpeed(sit ? 2f : 4f);
     }
 
     public void Interact(bool interact)
     {
+        if (!_pv.IsMine || _interactManager == null) return;
         if (interact)
         {
+            if (_interactManager.Nearest == null) return;
             _interactManager.StartInteract();
-            _isInteracting = true;
-            Debug.Log("인터랙션 시작!");
+            LookAtTarget(_interactManager.Nearest.transform);
+            if (_stateManager != null) _stateManager.SetInteracting(true);
         }
         else
         {
             _interactManager.StopInteract();
-            _isInteracting = false;
-            Debug.Log("인터랙션 종료!");
-        }        
-    }    
-
-    public void SkillCheck() //미니게임 스킬 체크
-    {
-
+            if (_stateManager != null) _stateManager.SetInteracting(false);
+        }
     }
 
-    public void FixGenerator() //발전기 수리
+    private void LookAtTarget(Transform target)
     {
-
+        if (target == null) return;
+        Vector3 dir = target.position - transform.position;
+        dir.y = 0f;
+        if (dir.sqrMagnitude <= 0.0001f) return;
+        _rb.MoveRotation(Quaternion.LookRotation(dir, Vector3.up));
     }
 
+    [PunRPC] public void RPC_Hit() => _stateManager?.OnHit();
 
-    public void Heal() //생존자 치료
+    [PunRPC]
+    public void RPC_Lift(int liftPointViewId)
     {
-
-    }
-
-    public void Resque() //생존자 구출
-    {
-
-    }
-
-    public void UseItem()
-    {
-
+        PhotonView pointPv = PhotonView.Find(liftPointViewId);
+        if (pointPv == null) return;
+        transform.SetParent(pointPv.transform);
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
     }
 
     protected override void MoveRogic()
     {
-        
-        if (MoveInput == Vector2.zero)
+        if (!_pv.IsMine) return;
+        bool isMoving = MoveInput.sqrMagnitude > 0.0001f;
+        _currentAnimSpeed = isMoving ? MoveSpeed : 0f;
+        if (_animator != null) _animator.SetFloat("Speed", _currentAnimSpeed);
+
+        if (!isMoving)
         {
             _rb.linearVelocity = new Vector3(0, _rb.linearVelocity.y, 0);
             return;
         }
 
         Transform cam = Camera.main.transform;
+        Vector3 dir = (cam.forward * MoveInput.y + cam.right * MoveInput.x);
+        dir.y = 0;
+        dir.Normalize();
 
-        
-        Vector3 camForward = cam.forward;
-        camForward.y = 0f;
-        camForward.Normalize();
+        _rb.linearVelocity = new Vector3(dir.x * MoveSpeed, _rb.linearVelocity.y, dir.z * MoveSpeed);
+        _rb.MoveRotation(Quaternion.Slerp(_rb.rotation, Quaternion.LookRotation(dir), 15f * Time.fixedDeltaTime));
+    }
 
-        Vector3 camRight = cam.right;
-        camRight.y = 0f;
-        camRight.Normalize();
+    public Transform GetCameraAnchor() => _cameraAnchor;
 
-        Vector3 dir = (camForward * MoveInput.y + camRight * MoveInput.x).normalized;
-        Vector3 velocity = dir * _moveSpeed;
-
-        
-        _rb.linearVelocity = new Vector3(velocity.x, _rb.linearVelocity.y, velocity.z);
-
-        
-        if (dir != Vector3.zero)
-        {        
-            Quaternion targetRot = Quaternion.LookRotation(dir);
-            _rb.MoveRotation(Quaternion.Slerp(_rb.rotation, targetRot, 15f * Time.fixedDeltaTime));
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting) stream.SendNext(_currentAnimSpeed);
+        else
+        {
+            _currentAnimSpeed = (float)stream.ReceiveNext();
+            if (_animator != null) _animator.SetFloat("Speed", _currentAnimSpeed);
         }
     }
 }
