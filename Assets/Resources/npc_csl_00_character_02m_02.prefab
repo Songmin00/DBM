@@ -7453,6 +7453,59 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5651776616523590678}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8971844027853005801
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 235451964782530522}
+  - component: {fileID: 7912478945150083030}
+  m_Layer: 7
+  m_Name: Interaction
+  m_TagString: SurvivorInteractRange
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &235451964782530522
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8971844027853005801}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7818653465335235202}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &7912478945150083030
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8971844027853005801}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 1
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!1 &9011487033142362519
 GameObject:
   m_ObjectHideFlags: 0
@@ -7656,7 +7709,9 @@ GameObject:
   - component: {fileID: -1089749190302756252}
   - component: {fileID: -5828649974120907717}
   - component: {fileID: -4707502499793231035}
-  m_Layer: 0
+  - component: {fileID: 2057280282678278530}
+  - component: {fileID: -4815006415362060136}
+  m_Layer: 6
   m_Name: npc_csl_00_character_02m_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7677,6 +7732,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7546781256486961099}
+  - {fileID: 235451964782530522}
   - {fileID: 166400102209238790}
   - {fileID: 2020088452482759749}
   - {fileID: 7283816845636974131}
@@ -7759,7 +7815,7 @@ Animator:
   m_GameObject: {fileID: 9115183316710738675}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 4350b309aa35d8241b5a918441629bdc, type: 3}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 7f576537d948b9f48b909aa88a4ce77a, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -7841,6 +7897,8 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: -1089749190302756252}
+  - {fileID: 2057280282678278530}
+  - {fileID: -4815006415362060136}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -7858,8 +7916,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: PhotonUnityNetworking::Photon.Pun.PhotonAnimatorView
   ShowLayerWeightsInspector: 1
   ShowParameterInspector: 1
-  m_SynchronizeParameters: []
-  m_SynchronizeLayers: []
+  m_SynchronizeParameters:
+  - Type: 1
+    SynchronizeType: 1
+    Name: Speed
+  - Type: 4
+    SynchronizeType: 1
+    Name: IsInteracting
+  - Type: 4
+    SynchronizeType: 1
+    Name: IsSitting
+  - Type: 4
+    SynchronizeType: 1
+    Name: IsHurt
+  - Type: 4
+    SynchronizeType: 1
+    Name: IsDying
+  - Type: 4
+    SynchronizeType: 1
+    Name: IsHang
+  - Type: 4
+    SynchronizeType: 0
+    Name: IsLifted
+  m_SynchronizeLayers:
+  - SynchronizeType: 1
+    LayerIndex: 0
+  - SynchronizeType: 0
+    LayerIndex: 1
 --- !u!114 &-5828649974120907717
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7873,7 +7956,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorController
   _cameraAnchor: {fileID: 7546781256486961099}
-  _interactManager: {fileID: -4707502499793231035}
 --- !u!114 &-4707502499793231035
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7886,6 +7968,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9cc0d0e7f56857b4eaa32a6d6251463c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorInteractManager
+--- !u!114 &2057280282678278530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9115183316710738675}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PhotonUnityNetworking::Photon.Pun.PhotonTransformView
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
+  m_UseLocal: 1
+--- !u!114 &-4815006415362060136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9115183316710738675}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13c07d6a0e5703743985b070daec1d53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SurvivorStateManager
 --- !u!1001 &3314161091946327985
 PrefabInstance:
   m_ObjectHideFlags: 0
