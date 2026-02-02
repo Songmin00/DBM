@@ -1,28 +1,29 @@
 using Photon.Pun;
 using UnityEngine;
 
-public class Generator : MonoBehaviourPun, IInteractable
+public class Generator : MonoBehaviourPun, ISurvivorInteractable, IPunObservable
 {
-    private float gauge = 80f;
+    private float _totalGauge = 80f;
     private float _currentGauge = 0f;
     private int _fixingSurvivors = 0;
-    private bool _isFixed = false;
+
+    public bool IsSurvivorInteractable { get; set; } = true;
 
     private void Update()
     {
         if (!PhotonNetwork.IsMasterClient) return;
-        if (_isFixed) return;
+        if (!IsSurvivorInteractable) return;
         if (_fixingSurvivors <= 0) return;
 
         FixingLogic();
     }
 
-    public void StartInteract()
+    public void StartSurvivorInteract()
     {
         photonView.RPC(nameof(RPC_AddFixer), RpcTarget.MasterClient);
     }
 
-    public void StopInteract()
+    public void StopSurvivorInteract()
     {
         photonView.RPC(nameof(RPC_RemoveFixer), RpcTarget.MasterClient);
     }
@@ -43,31 +44,36 @@ public class Generator : MonoBehaviourPun, IInteractable
     {
         _currentGauge += Time.deltaTime * (1 + (_fixingSurvivors - 1) * 0.5f);
 
-        photonView.RPC(nameof(RPC_SyncGauge), RpcTarget.Others, _currentGauge);
-
-        if (_currentGauge >= gauge)
+        Debug.Log($"ÁøÇàµµ : {_currentGauge}");
+        if (_currentGauge >= _totalGauge)
         {
-            _currentGauge = gauge;
+            _currentGauge = _totalGauge;
             GetFixed();
         }
     }
 
-    [PunRPC]
-    private void RPC_SyncGauge(float value)
-    {
-        _currentGauge = value;
-    }
-
     private void GetFixed()
     {
-        _isFixed = true;
+        IsSurvivorInteractable = false;
         photonView.RPC(nameof(RPC_Fixed), RpcTarget.All);
     }
 
     [PunRPC]
     private void RPC_Fixed()
     {
-        _isFixed = true;
+        IsSurvivorInteractable = false;
         Debug.Log("Fixed!!");
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(_currentGauge);
+        }
+        else
+        {
+            _currentGauge = (float)stream.ReceiveNext();
+        }
     }
 }
