@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class KillerInputActionResolver
 {
-    private KillerController _killerController;    
+    private KillerController _killerController;
 
     public KillerInputActionResolver(KillerController controller)
     {
@@ -10,7 +10,7 @@ public class KillerInputActionResolver
     }
 
     public ICommand ResolveMove(Vector2 input)
-    {        
+    {
         return new MoveCommand(_killerController, input);
     }
 
@@ -18,6 +18,4 @@ public class KillerInputActionResolver
     {
         return new LookCommand(_killerController, input);
     }
-
-
 }

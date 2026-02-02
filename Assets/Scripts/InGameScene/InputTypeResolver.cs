@@ -7,7 +7,7 @@ public class InputTypeResolver
     private PlayerType _inputType;
 
     private KillerInputActionResolver _killerInputActionResolver;
-    private SurvivorInputActionResolver _survivorInputActionResolver;    
+    private SurvivorInputActionResolver _survivorInputActionResolver;
 
     private KillerController _killerController;
     private SurvivorController _survivorController;
@@ -20,12 +20,12 @@ public class InputTypeResolver
         {
             case PlayerType.Killer:
                 _killerController = InGameManager.Instance.GetCharacterObject().GetComponent<KillerController>();
-                _killerInputActionResolver = new KillerInputActionResolver(_killerController);                
+                _killerInputActionResolver = new KillerInputActionResolver(_killerController);
                 break;
 
             case PlayerType.Survivor:
                 _survivorController = InGameManager.Instance.GetCharacterObject().GetComponent<SurvivorController>();
-                _survivorInputActionResolver = new SurvivorInputActionResolver(_survivorController);                
+                _survivorInputActionResolver = new SurvivorInputActionResolver(_survivorController);
                 break;
         }
     }
@@ -62,22 +62,21 @@ public class InputTypeResolver
         }
     }
 
-    //public ICommand OnLeftMouseClick()
-    //{
-    //    switch (_inputType)
-    //    {
-    //        case PlayerType.Killer:
-    //            return new AttackCommand(_killerController);
+    public ICommand OnLeftMouseClick()
+    {
+        switch (_inputType)
+        {
+            case PlayerType.Killer:
+                return new AttackCommand(_killerController);
 
+            case PlayerType.Survivor:
+                return new NullCommand();
 
-    //        case PlayerType.Survivor:
-    //            return null;
-
-    //            default:
-    //            Debug.Log("잘못된 플레이어 타입 설정 : None");
-    //            return null;
-    //    }
-    //}
+            default:
+                Debug.Log("잘못된 플레이어 타입 설정 : None");
+                return null;
+        }
+    }
 
     public ICommand OnLeftMouseHold(bool isHold)
     {
@@ -86,9 +85,8 @@ public class InputTypeResolver
             case PlayerType.Killer:
                 return new LungeAttackCommand(_killerController);
 
-
             case PlayerType.Survivor:
-            return new InteractCommand(_survivorController, isHold);
+                return new SurvivorInteractCommand(_survivorController, isHold);
 
             default:
                 Debug.Log("잘못된 플레이어 타입 설정 : None");
@@ -96,90 +94,51 @@ public class InputTypeResolver
         }
     }
 
-    //public ICommand OnRightMouseClick()
-    //{
-    //    switch (_inputType)
-    //    {
-    //        case PlayerType.Killer:
-    //            return new LungeAttackCommand(_killerController); //이거 특수능력으로 바꿔주기
+    public ICommand OnCtrl(bool isHold)
+    {
+        switch (_inputType)
+        {
+            case PlayerType.Killer:
+                return new NullCommand(); //이거 특수능력2로 바꿔주기
 
+            case PlayerType.Survivor:
+                return _survivorInputActionResolver.ResolveSit(isHold);
 
-    //        case PlayerType.Survivor:
-    //            //return new InteractCommand(_survivorController); //이거 아이템 사용으로 바꿔주기
+            default:
+                Debug.Log("잘못된 플레이어 타입 설정 : None");
+                return null;
+        }
+    }
 
-    //        default:
-    //            Debug.Log("잘못된 플레이어 타입 설정 : None");
-    //            return null;
-    //    }
-    //}
+    public ICommand OnSpace()
+    {
+        switch (_inputType)
+        {
+            case PlayerType.Killer:
+                return new KillerInteractCommand(_killerController);
 
-    //public ICommand OnRightMouseHold()
-    //{
-    //    switch (_inputType)
-    //    {
-    //        case PlayerType.Killer:
-    //            return new LungeAttackCommand(_killerController); //이거 특수능력1로 바꿔주기
+            case PlayerType.Survivor:
+                return new NullCommand();
 
+            default:
+                Debug.Log("잘못된 플레이어 타입 설정 : None");
+                return null;
+        }
+    }
 
-    //        case PlayerType.Survivor:
-    //            //return new InteractCommand(_survivorController); //이거 아이템 사용으로 바꿔주기
+    public ICommand OnShift(bool isHold)
+    {
+        switch (_inputType)
+        {
+            case PlayerType.Killer:
+                return new NullCommand();
 
-    //        default:
-    //            Debug.Log("잘못된 플레이어 타입 설정 : None");
-    //            return null;
-    //    }
-    //}
+            case PlayerType.Survivor:
+                return new RunCommand(_survivorController, isHold);
 
-    //public ICommand OnCtrl()
-    //{
-    //    switch (_inputType)
-    //    {
-    //        case PlayerType.Killer:
-    //            return new LungeAttackCommand(_killerController); //이거 특수능력2로 바꿔주기
-
-
-    //        case PlayerType.Survivor:
-    //            return new SitCommand(_survivorController);
-
-    //        default:
-    //            Debug.Log("잘못된 플레이어 타입 설정 : None");
-    //            return null;
-    //    }
-    //}
-
-    //public ICommand OnSpace()
-    //{
-    //    switch (_inputType)
-    //    {
-    //        case PlayerType.Killer:
-    //            return new VaultCommand(_killerController); //이거 판자부수기, 발전기 부수기랑 통합했다가 컨트롤러딴(혹은 상황별 액션 분리기)에서 나눠줘야함.
-
-
-    //        case PlayerType.Survivor:
-    //            return new VaultCommand(_survivorController);
-
-    //        default:
-    //            Debug.Log("잘못된 플레이어 타입 설정 : None");
-    //            return null;
-    //    }
-    //}
-
-    //public ICommand OnR()
-    //{
-    //    switch (_inputType)
-    //    {
-    //        case PlayerType.Killer:
-    //            return new DropCommand(_killerController); //이거 판자부수기, 발전기 부수기랑 통합했다가 컨트롤러딴(혹은 상황별 액션 분리기)에서 나눠줘야함.
-
-
-    //        case PlayerType.Survivor:
-    //            return new VaultCommand(_survivorController); //이거 아이템 버리기로 바꿔줘야 함
-
-    //        default:
-    //            Debug.Log("잘못된 플레이어 타입 설정 : None");
-    //            return null;
-    //    }
-    //}
-
-
+            default:
+                Debug.Log("잘못된 플레이어 타입 설정 : None");
+                return null;
+        }
+    }
 }
