@@ -7897,6 +7897,7 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: -1089749190302756252}
+  - {fileID: -5828649974120907717}
   - {fileID: 2057280282678278530}
   - {fileID: -4815006415362060136}
   sceneViewId: 0
@@ -7936,12 +7937,12 @@ MonoBehaviour:
     SynchronizeType: 1
     Name: IsHang
   - Type: 4
-    SynchronizeType: 0
+    SynchronizeType: 1
     Name: IsLifted
   m_SynchronizeLayers:
   - SynchronizeType: 1
     LayerIndex: 0
-  - SynchronizeType: 0
+  - SynchronizeType: 1
     LayerIndex: 1
 --- !u!114 &-5828649974120907717
 MonoBehaviour:

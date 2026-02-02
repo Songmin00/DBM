@@ -1280,6 +1280,7 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: -2395815988671187567}
+  - {fileID: -3682815649071950840}
   - {fileID: 1010744838672614627}
   - {fileID: 4247009995170194469}
   sceneViewId: 0
@@ -1319,12 +1320,12 @@ MonoBehaviour:
     SynchronizeType: 1
     Name: IsHang
   - Type: 4
-    SynchronizeType: 0
+    SynchronizeType: 1
     Name: IsLifted
   m_SynchronizeLayers:
   - SynchronizeType: 1
     LayerIndex: 0
-  - SynchronizeType: 0
+  - SynchronizeType: 1
     LayerIndex: 1
 --- !u!114 &-3682815649071950840
 MonoBehaviour:
@@ -1379,8 +1380,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13c07d6a0e5703743985b070daec1d53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorStateManager
-  _animator: {fileID: 0}
-  _controller: {fileID: 0}
+  healTime: 16
+  rescueTime: 1.5
 --- !u!1 &1450471497623237830
 GameObject:
   m_ObjectHideFlags: 0

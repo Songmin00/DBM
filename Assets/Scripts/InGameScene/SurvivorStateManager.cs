@@ -7,7 +7,7 @@ public enum SurvivorState
     None, Hurt, Dying, Lifted, Hang, Survive, Dead
 }
 
-public class SurvivorStateManager : MonoBehaviour, ISurvivorInteractable, IKillerInteractable, IPunObservable
+public class SurvivorStateManager : MonoBehaviourPunCallbacks, ISurvivorInteractable, IKillerInteractable, IPunObservable
 {
     private Animator _animator;
     private SurvivorController _controller;
@@ -18,16 +18,13 @@ public class SurvivorStateManager : MonoBehaviour, ISurvivorInteractable, IKille
     public bool IsSitting { get; private set; }
     public bool IsInteracting { get; private set; }
 
-    // 인터페이스 플래그
     public bool IsSurvivorInteractable { get; set; } = false;
     public bool IsKillerInteractable { get; set; } = false;
 
-    // Healing
     [SerializeField] private float healTime = 16f;
     private float _healGauge = 0f;
     private readonly HashSet<int> _healers = new HashSet<int>();
 
-    // Rescue
     [SerializeField] private float rescueTime = 1.5f;
     private float _rescueGauge = 0f;
     private readonly HashSet<int> _rescuers = new HashSet<int>();
@@ -41,21 +38,12 @@ public class SurvivorStateManager : MonoBehaviour, ISurvivorInteractable, IKille
 
     private void Start()
     {
-        // 시작 시 상태 적용 (시각/플래그 모두)
         ApplyStateVisual(CurrentState);
         ApplyInteractableFlags(CurrentState);
-
-        // 앉기/인터랙트 기본값도 명시
-        if (_animator != null)
-        {
-            _animator.SetBool("IsSitting", IsSitting);
-            _animator.SetBool("IsInteracting", IsInteracting);
-        }
     }
 
     private void Update()
     {
-        // 게이지 진행은 오너만
         if (_pv == null || !_pv.IsMine) return;
 
         if (CurrentState == SurvivorState.Hurt || CurrentState == SurvivorState.Dying)
@@ -65,14 +53,38 @@ public class SurvivorStateManager : MonoBehaviour, ISurvivorInteractable, IKille
             RescueLogic();
     }
 
-    // ================= External =================
-
     public void OnHit()
     {
         if (CurrentState == SurvivorState.None)
-            ChangeState(SurvivorState.Hurt, resetProgress: true);
+            RequestStateChange(SurvivorState.Hurt, true);
         else if (CurrentState == SurvivorState.Hurt)
-            ChangeState(SurvivorState.Dying, resetProgress: true);
+            RequestStateChange(SurvivorState.Dying, true);
+    }
+
+    // 상태 변경을 네트워크 전체에 요청하는 메서드
+    public void RequestStateChange(SurvivorState next, bool resetProgress)
+    {
+        _pv.RPC(nameof(RPC_SyncState), RpcTarget.All, (int)next, resetProgress);
+    }
+
+    [PunRPC]
+    private void RPC_SyncState(int nextState, bool resetProgress)
+    {
+        SurvivorState next = (SurvivorState)nextState;
+        if (CurrentState == next) return;
+
+        CurrentState = next;
+
+        if (resetProgress)
+        {
+            _healers.Clear();
+            _rescuers.Clear();
+            _healGauge = 0f;
+            _rescueGauge = 0f;
+        }
+
+        ApplyStateVisual(next);
+        ApplyInteractableFlags(next);
     }
 
     public void SetSitting(bool sit)
@@ -92,42 +104,24 @@ public class SurvivorStateManager : MonoBehaviour, ISurvivorInteractable, IKille
         if (IsInteracting) return false;
         if (CurrentState == SurvivorState.Lifted) return false;
         if (CurrentState == SurvivorState.Hang) return false;
+        if (CurrentState == SurvivorState.Dying) return true;
         return true;
     }
 
-    // ================= ISurvivorInteractable =================
-    // ※ 발전기/기타가 직접 호출할 수도 있어서 구현은 유지.
-    //    "생존자 치료"는 InteractManager가 RPC_SurvivorInteractStart(viewId)로 호출하는 방식이 메인.
-
-    public void StartSurvivorInteract()
-    {
-        // 누가 상호작용했는지(viewId)가 없으므로
-        // 치료 카운트에는 넣지 않고 애니만 켠다(안전장치).
-        SetInteracting(true);
-    }
-
-    public void StopSurvivorInteract()
-    {
-        SetInteracting(false);
-    }
-
-    // ================= IKillerInteractable =================
+    public void StartSurvivorInteract() => SetInteracting(true);
+    public void StopSurvivorInteract() => SetInteracting(false);
 
     public void StartKillerInteract(KillerController killer)
     {
         if (killer == null) return;
         PhotonView killerPv = killer.GetComponent<PhotonView>();
-        if (killerPv == null) return;
-        if (_pv == null) return;
+        if (killerPv == null || _pv == null) return;
 
-        // 생존자 오너에게 상태 전환 요청
+        // 생존자 오너에게 알림
         _pv.RPC(nameof(RPC_KillerInteract), _pv.Owner, killerPv.ViewID);
     }
 
-    public void StopKillerInteract()
-    {
-        // 필요 시 확장 (내려놓기 등)
-    }
+    public void StopKillerInteract() { }
 
     [PunRPC]
     private void RPC_KillerInteract(int killerViewId)
@@ -136,63 +130,63 @@ public class SurvivorStateManager : MonoBehaviour, ISurvivorInteractable, IKille
 
         if (CurrentState == SurvivorState.Dying)
         {
-            ChangeState(SurvivorState.Lifted, resetProgress: true);
+            // 1. 먼저 상태를 '들림'으로 모든 클라이언트 동기화
+            RequestStateChange(SurvivorState.Lifted, true);
+
+            // 2. 모든 클라이언트에서 킬러의 어깨에 붙도록 실행
+            _pv.RPC(nameof(RPC_Lift), RpcTarget.All, killerViewId);
         }
         else if (CurrentState == SurvivorState.Lifted)
         {
-            ChangeState(SurvivorState.Hang, resetProgress: true);
+            RequestStateChange(SurvivorState.Hang, true);
         }
     }
 
-    // ================= FSM =================
-
-    private void ChangeState(SurvivorState next, bool resetProgress)
+    [PunRPC]
+    public void RPC_Lift(int killerViewId)
     {
-        if (CurrentState == next) return;
-
-        CurrentState = next;
-
-        if (resetProgress)
+        if (killerViewId == -1) // 해제 (내려놓기)
         {
-            _healers.Clear();
-            _rescuers.Clear();
-            _healGauge = 0f;
-            _rescueGauge = 0f;
-        }
+            transform.SetParent(null);
 
-        ApplyStateVisual(next);
-        ApplyInteractableFlags(next);
+            // 물리 및 동기화 컴포넌트 복구
+            if (TryGetComponent(out PhotonTransformView ptv)) ptv.enabled = true;
+            _controller.SetPhysical(true);
+        }
+        else // 들기
+        {
+            PhotonView killerPv = PhotonView.Find(killerViewId);
+            if (killerPv != null)
+            {
+                // 킬러의 리프트 포인트 찾기
+                var killerCtrl = killerPv.GetComponent<KillerController>();
+                Transform liftPoint = killerCtrl.GetLiftPoint();
+
+                // 부모 설정 및 위치 초기화
+                transform.SetParent(liftPoint);
+                transform.localPosition = Vector3.zero;
+                transform.localRotation = Quaternion.identity;
+
+                // [중요] 떨림 방지: 개별 위치 동기화 및 물리 엔진 비활성화                
+                _controller.SetPhysical(false);
+            }
+        }
     }
 
     private void ApplyInteractableFlags(SurvivorState state)
     {
-        IsSurvivorInteractable = false;
-        IsKillerInteractable = false;
-
-        switch (state)
-        {
-            case SurvivorState.Hurt:
-                IsSurvivorInteractable = true; // 치료 가능
-                break;
-
-            case SurvivorState.Dying:
-                IsKillerInteractable = true; // 들쳐업기 가능
-                break;
-
-            case SurvivorState.Hang:
-                IsSurvivorInteractable = true; // 구조 가능
-                break;
-        }
+        IsSurvivorInteractable = (state == SurvivorState.Hurt || state == SurvivorState.Hang);
+        IsKillerInteractable = (state == SurvivorState.Dying || state == SurvivorState.Lifted);
     }
 
     private void ApplyStateVisual(SurvivorState state)
     {
         if (_animator != null)
         {
-            _animator.SetBool("IsHurt", false);
-            _animator.SetBool("IsDying", false);
-            _animator.SetBool("IsLifted", false);
-            _animator.SetBool("IsHang", false);
+            _animator.SetBool("IsHurt", state == SurvivorState.Hurt);
+            _animator.SetBool("IsDying", state == SurvivorState.Dying);
+            _animator.SetBool("IsLifted", state == SurvivorState.Lifted);
+            _animator.SetBool("IsHang", state == SurvivorState.Hang);
         }
 
         if (_controller == null) return;
@@ -200,101 +194,53 @@ public class SurvivorStateManager : MonoBehaviour, ISurvivorInteractable, IKille
         switch (state)
         {
             case SurvivorState.None:
-                _controller.SetMoveSpeed(4f);
-                _controller.SetPhysical(true);
-                break;
-
             case SurvivorState.Hurt:
                 _controller.SetMoveSpeed(4f);
-                _controller.SetPhysical(true);
-                if (_animator != null) _animator.SetBool("IsHurt", true);
                 break;
-
             case SurvivorState.Dying:
                 _controller.SetMoveSpeed(1.5f);
-                _controller.SetPhysical(true);
-                if (_animator != null) _animator.SetBool("IsDying", true);
                 break;
-
             case SurvivorState.Lifted:
-                _controller.SetPhysical(false);
-                if (_animator != null) _animator.SetBool("IsLifted", true);
-                break;
-
             case SurvivorState.Hang:
-                _controller.SetPhysical(false);
-                if (_animator != null) _animator.SetBool("IsHang", true);
+                // 이동 속도를 0으로 만들어 혹시 모를 입력을 차단
+                _controller.SetMoveSpeed(0f);
                 break;
-        }
-
-        // sitting/interacting는 상태 전환에서 끄지 않는다(네 요구: 공존 가능)
-        if (_animator != null)
-        {
-            _animator.SetBool("IsSitting", IsSitting);
-            _animator.SetBool("IsInteracting", IsInteracting);
         }
     }
-
-    // ================= RPC (치료/구조 핵심) =================
 
     [PunRPC]
     public void RPC_SurvivorInteractStart(int requesterViewId)
     {
-        if (_pv == null || !_pv.IsMine) return;
-
-        if (CurrentState == SurvivorState.Hurt || CurrentState == SurvivorState.Dying)
-        {
-            _healers.Add(requesterViewId);
-        }
-        else if (CurrentState == SurvivorState.Hang)
-        {
-            _rescuers.Add(requesterViewId);
-        }
+        if (!_pv.IsMine) return;
+        if (CurrentState == SurvivorState.Hurt || CurrentState == SurvivorState.Dying) _healers.Add(requesterViewId);
+        else if (CurrentState == SurvivorState.Hang) _rescuers.Add(requesterViewId);
     }
 
     [PunRPC]
     public void RPC_SurvivorInteractStop(int requesterViewId)
     {
-        if (_pv == null || !_pv.IsMine) return;
-
+        if (!_pv.IsMine) return;
         _healers.Remove(requesterViewId);
         _rescuers.Remove(requesterViewId);
     }
 
-    // ================= Logic =================
-
     private void HealingLogic()
     {
         if (_healers.Count == 0) return;
-
-        float speed = _healers.Count * (1f / healTime);
-        _healGauge += speed * Time.deltaTime;
-        _healGauge = Mathf.Clamp01(_healGauge);
-
-        if (_healGauge >= 1f)
-        {
-            if (CurrentState == SurvivorState.Dying)
-                ChangeState(SurvivorState.Hurt, resetProgress: true);
-            else if (CurrentState == SurvivorState.Hurt)
-                ChangeState(SurvivorState.None, resetProgress: true);
-        }
+        _healGauge += (_healers.Count / healTime) * Time.deltaTime;
+        if (_healGauge >= 1f) RequestStateChange(CurrentState == SurvivorState.Dying ? SurvivorState.Hurt : SurvivorState.None, true);
     }
 
     private void RescueLogic()
     {
         if (_rescuers.Count == 0) return;
-
-        float speed = _rescuers.Count * (1f / rescueTime);
-        _rescueGauge += speed * Time.deltaTime;
-        _rescueGauge = Mathf.Clamp01(_rescueGauge);
-
+        _rescueGauge += (_rescuers.Count / rescueTime) * Time.deltaTime;
         if (_rescueGauge >= 1f)
         {
-            ChangeState(SurvivorState.Hurt, resetProgress: true);
+            RequestStateChange(SurvivorState.Hurt, true);
+            _pv.RPC(nameof(RPC_Lift), RpcTarget.All, -1);
         }
     }
-
-    // ================= Sync =================
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
@@ -305,27 +251,16 @@ public class SurvivorStateManager : MonoBehaviour, ISurvivorInteractable, IKille
             stream.SendNext(IsInteracting);
             stream.SendNext(_healGauge);
             stream.SendNext(_rescueGauge);
-            stream.SendNext(IsSurvivorInteractable);
-            stream.SendNext(IsKillerInteractable);
         }
         else
         {
+            // 중요 상태 변경은 RPC가 처리하므로, 여기서는 값 수신 후 비주얼만 갱신
             CurrentState = (SurvivorState)(int)stream.ReceiveNext();
             IsSitting = (bool)stream.ReceiveNext();
             IsInteracting = (bool)stream.ReceiveNext();
             _healGauge = (float)stream.ReceiveNext();
             _rescueGauge = (float)stream.ReceiveNext();
-            IsSurvivorInteractable = (bool)stream.ReceiveNext();
-            IsKillerInteractable = (bool)stream.ReceiveNext();
-
-            // 원격은 "시각/플래그"만 반영
             ApplyStateVisual(CurrentState);
-
-            if (_animator != null)
-            {
-                _animator.SetBool("IsSitting", IsSitting);
-                _animator.SetBool("IsInteracting", IsInteracting);
-            }
         }
     }
 }

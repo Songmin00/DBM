@@ -27,7 +27,7 @@ public class SurvivorController : CharacterControllerBase, IPunObservable
     protected override void FixedUpdate()
     {
         if (_pv == null || !_pv.IsMine) return;
-        base.FixedUpdate(); // 뱅글뱅글 방지
+        base.FixedUpdate();
         if (_stateManager != null && !_stateManager.CanMove()) return;
         MoveRogic();
     }
@@ -36,7 +36,14 @@ public class SurvivorController : CharacterControllerBase, IPunObservable
 
     public void SetPhysical(bool enable)
     {
-        if (_rb != null) _rb.isKinematic = !enable;
+        // 들려있을 때는 물리 연산(Gravity 포함)이 꺼져야 함
+        if (_rb != null)
+        {
+            _rb.isKinematic = !enable;
+            _rb.useGravity = enable;
+            _rb.linearVelocity = Vector3.zero;
+            Pv.enabled = enable;
+        }
         if (_capsuleCollider != null) _capsuleCollider.enabled = enable;
     }
 
@@ -84,8 +91,17 @@ public class SurvivorController : CharacterControllerBase, IPunObservable
     [PunRPC]
     public void RPC_Lift(int liftPointViewId)
     {
+        // 모든 클라이언트에서 동일하게 부모-자식 관계를 형성
         PhotonView pointPv = PhotonView.Find(liftPointViewId);
-        if (pointPv == null) return;
+        if (pointPv == null)
+        {
+            // 갈고리 해제 혹은 내려놓기 시 (ID가 -1 등일 때)
+            transform.SetParent(null);
+            SetPhysical(true);
+            return;
+        }
+
+        SetPhysical(false);
         transform.SetParent(pointPv.transform);
         transform.localPosition = Vector3.zero;
         transform.localRotation = Quaternion.identity;

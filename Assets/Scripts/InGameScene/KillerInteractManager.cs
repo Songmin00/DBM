@@ -25,42 +25,33 @@ public class KillerInteractManager : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("SurvivorInteractRange")) return;
+        // 태그 검사 로직 유지
+        if (!other.CompareTag("SurvivorInteractRange") && !other.CompareTag("Hook")) return;
         if (!_overlaps.Contains(other))
         {
             _overlaps.Add(other);
-            Debug.Log("상호작용 대상 발견");
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (!other.CompareTag("SurvivorInteractRange")) return;
+        if (!other.CompareTag("SurvivorInteractRange") && !other.CompareTag("Hook")) return;
         _overlaps.Remove(other);
         if (other == Nearest)
         {
             StopInteract();
         }
-        Debug.Log("상호작용 대상 제거");
     }
 
     public void StartInteract()
     {
         if (Nearest == null) return;
 
-        // 디버그 (너가 넣은 그대로 유지)
-        if (Nearest.GetComponentInParent<SurvivorStateManager>() != null)
-            Debug.Log($"State: {Nearest.GetComponentInParent<SurvivorStateManager>().CurrentState}");
-
-        var killerInteractable = Nearest.GetComponentInParent<IKillerInteractable>();
-        if (killerInteractable != null)
-            Debug.Log($"IsKillerInteractable: {killerInteractable.IsKillerInteractable}");
-
         _currentInterectable = Nearest.GetComponentInParent<IKillerInteractable>();
 
-        if (_currentInterectable == null) return;
-        if (!_currentInterectable.IsKillerInteractable) return;
+        if (_currentInterectable == null || !_currentInterectable.IsKillerInteractable) return;
 
+        // 타겟 방향 바라보기 (들쳐업기/걸기 전 정렬)
         Transform target = Nearest.transform.root;
         _controller.LookAtTarget(target);
 
@@ -89,8 +80,7 @@ public class KillerInteractManager : MonoBehaviour
             }
 
             var interactable = col.GetComponentInParent<IKillerInteractable>();
-            if (interactable == null) continue;
-            if (!interactable.IsKillerInteractable) continue;
+            if (interactable == null || !interactable.IsKillerInteractable) continue;
 
             float dist = Vector3.SqrMagnitude(col.transform.position - transform.position);
             if (dist < minDist)

@@ -54,7 +54,6 @@ public class KillerController : CharacterControllerBase, IPunObservable
 
     public void Look(Vector2 input)
     {
-        // 커맨드 패턴에서 전달된 델타값을 누적하거나 저장
         _lookDirection = input;
     }
 
@@ -78,7 +77,10 @@ public class KillerController : CharacterControllerBase, IPunObservable
 
     public void OnAttackHit()
     {
+        // 피격 판정은 마스터 클라이언트 혹은 공격자 본인이 판정 (서버 구조에 따라 다름)
+        // 여기서는 기존 로직대로 MasterClient가 판정하도록 유지
         if (!PhotonNetwork.IsMasterClient) return;
+
         _isDelaying = true;
         Vector3 center = transform.position + transform.forward * 1.8f;
         Vector3 halfExtents = new Vector3(0.7f, 1.0f, 1.0f);
@@ -123,25 +125,19 @@ public class KillerController : CharacterControllerBase, IPunObservable
 
         _animator.SetFloat("Speed", MoveSpeed);
         _rb.linearVelocity = new Vector3(velocity.x, _rb.linearVelocity.y, velocity.z);
-
-        // 킬러는 이동 방향으로 몸을 돌리지 않고 카메라 정면을 유지하는 경우가 많지만, 
-        // 필요하다면 여기서 추가 로직을 넣을 수 있습니다.
     }
 
     private void LookUpdate()
     {
         if (_isDelaying) return;
 
-        // 마우스 델타를 사용하여 직접 회전 (Yaw)
         float yaw = _lookDirection.x * _yawSpeed * Time.deltaTime;
         transform.Rotate(Vector3.up, yaw);
 
-        // 상하 회전 (Pitch)
         _currentPitch -= _lookDirection.y * _pitchSpeed * Time.deltaTime;
         _currentPitch = Mathf.Clamp(_currentPitch, _minPitch, _maxPitch);
         _pitchPivot.localRotation = Quaternion.Euler(_currentPitch, 0f, 0f);
 
-        // ★ 중요: 사용한 델타값 초기화 (커맨드가 안 들어올 때 계속 도는 것 방지)
         _lookDirection = Vector2.zero;
     }
 
