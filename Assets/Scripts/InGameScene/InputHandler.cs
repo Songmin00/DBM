@@ -1,8 +1,9 @@
-using System.Collections.Generic;
-using System.Collections;
 using Photon.Pun;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Windows;
 
 public class InputHandler : MonoBehaviourPunCallbacks
 {
@@ -10,13 +11,11 @@ public class InputHandler : MonoBehaviourPunCallbacks
     private PlayerType _inputType;
 
     List<ICommand> _commands = new List<ICommand>(); //매 프레임 실행할 커맨드 관리용 리스트
-    
-    
 
     private void Start()
     {
         _inputType = CharacterStateManager.Instance.PlayerType;
-        StartCoroutine(SetTypeRoutine()); // InGameManager가 캐릭턱를 생성하기를 기다렸다가 준비되면 정보 받아와서 하위 시스템들 세팅.
+        StartCoroutine(SetTypeRoutine()); // InGameManager가 캐릭터를 생성하기를 기다렸다가 준비되면 정보 받아와서 하위 시스템들 세팅.
     }
 
     private IEnumerator SetTypeRoutine()
@@ -26,7 +25,7 @@ public class InputHandler : MonoBehaviourPunCallbacks
     }
 
     private void Update()
-    {        
+    {
         if (_commands.Count == 0)
         {
             return;
@@ -44,23 +43,28 @@ public class InputHandler : MonoBehaviourPunCallbacks
 
     public void OnWASD(InputAction.CallbackContext ctx)
     {
+        if (_inputTypeResolver == null) return;
         Vector2 input = ctx.ReadValue<Vector2>();
         _commands.Add(_inputTypeResolver.OnWASD(input));
     }
 
     public void OnMousePointer(InputAction.CallbackContext ctx)
-    {             
+    {
+        if (_inputTypeResolver == null) return;
         Vector2 input = ctx.ReadValue<Vector2>();
-        _commands.Add(_inputTypeResolver.OnMousePointer(input));        
+        _commands.Add(_inputTypeResolver.OnMousePointer(input));
     }
 
-    public void OnLeftMouseClick()
+    public void OnLeftMouseClick(InputAction.CallbackContext ctx)
     {
-
+        if (_inputTypeResolver == null) return;
+        _commands.Add(_inputTypeResolver.OnLeftMouseClick());
     }
 
     public void OnLeftMouseHold(InputAction.CallbackContext ctx)
     {
+        if (_inputTypeResolver == null) return;
+
         if (ctx.started)
         {
             _commands.Add(_inputTypeResolver.OnLeftMouseHold(true));
@@ -81,14 +85,28 @@ public class InputHandler : MonoBehaviourPunCallbacks
 
     }
 
-    public void OnCtrl()
+    public void OnCtrl(InputAction.CallbackContext ctx)
     {
+        if (_inputTypeResolver == null) return;
 
+        if (ctx.started)
+        {
+            _commands.Add(_inputTypeResolver.OnCtrl(true));
+        }
+        else if (ctx.canceled)
+        {
+            _commands.Add(_inputTypeResolver.OnCtrl(false));
+        }
     }
 
-    public void OnSpace()
+    public void OnSpace(InputAction.CallbackContext ctx)
     {
+        if (_inputTypeResolver == null) return;
 
+        if (ctx.performed)
+        {            
+            _commands.Add(_inputTypeResolver.OnSpace());
+        }
     }
 
     public void OnR()
@@ -96,8 +114,17 @@ public class InputHandler : MonoBehaviourPunCallbacks
 
     }
 
-    public void OnShift()
+    public void OnShift(InputAction.CallbackContext ctx)
     {
+        if (_inputTypeResolver == null) return;
 
+        if (ctx.started)
+        {
+            _commands.Add(_inputTypeResolver.OnShift(true));
+        }
+        else if (ctx.canceled)
+        {
+            _commands.Add(_inputTypeResolver.OnShift(false));
+        }
     }
 }
