@@ -47,6 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 684cb996082d31c48b3e82fc0703f405, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Generator
+  _totalGauge: 20
 --- !u!135 &4121536173800198737
 SphereCollider:
   m_ObjectHideFlags: 0

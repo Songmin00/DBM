@@ -141,38 +141,53 @@ public class SurvivorStateManager : MonoBehaviourPunCallbacks, ISurvivorInteract
             RequestStateChange(SurvivorState.Hang, true);
         }
     }
+    // ... 기존 코드 유지 ...
 
+    [PunRPC]
+    public void RPC_AttachToHook(int hookPointViewId)
+    {
+        PhotonView pointPv = PhotonView.Find(hookPointViewId);
+        if (pointPv != null)
+        {
+            // 킬러의 어깨에서 갈고리로 부모 변경
+            transform.SetParent(pointPv.transform);
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
+
+            _controller.SetPhysical(false);
+            if (TryGetComponent(out PhotonTransformView ptv)) ptv.enabled = false;
+        }
+    }
+
+    
     [PunRPC]
     public void RPC_Lift(int killerViewId)
     {
-        if (killerViewId == -1) // 해제 (내려놓기)
+        if (killerViewId == -1) // 해제 (내려놓기 또는 구출됨)
         {
             transform.SetParent(null);
-
-            // 물리 및 동기화 컴포넌트 복구
-            if (TryGetComponent(out PhotonTransformView ptv)) ptv.enabled = true;
             _controller.SetPhysical(true);
+            if (TryGetComponent(out PhotonTransformView ptv)) ptv.enabled = true;
         }
-        else // 들기
+        else // 킬러가 들기
         {
             PhotonView killerPv = PhotonView.Find(killerViewId);
             if (killerPv != null)
             {
-                // 킬러의 리프트 포인트 찾기
                 var killerCtrl = killerPv.GetComponent<KillerController>();
                 Transform liftPoint = killerCtrl.GetLiftPoint();
 
-                // 부모 설정 및 위치 초기화
                 transform.SetParent(liftPoint);
                 transform.localPosition = Vector3.zero;
                 transform.localRotation = Quaternion.identity;
 
-                // [중요] 떨림 방지: 개별 위치 동기화 및 물리 엔진 비활성화                
                 _controller.SetPhysical(false);
+                if (TryGetComponent(out PhotonTransformView ptv)) ptv.enabled = false;
             }
         }
     }
 
+    // ... 나머지 로직 유지 ...
     private void ApplyInteractableFlags(SurvivorState state)
     {
         IsSurvivorInteractable = (state == SurvivorState.Hurt || state == SurvivorState.Hang);

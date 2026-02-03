@@ -1,4 +1,5 @@
 using Photon.Pun;
+using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -7,9 +8,20 @@ public class InGameManager : MonoBehaviourPunCallbacks
 {
     public static InGameManager Instance;
 
+    [Header("맵 세팅용 필드")]
     [SerializeField] CinemachineCamera _survivorCameraPrefab;
     [SerializeField] CinemachineCamera _killerCameraPrefab;
     [SerializeField] GameObject _generatorPrefab;
+    [SerializeField] GameObject _hookPrefab;
+    [SerializeField] List<Transform> _generatorPos;
+    [SerializeField] List<Transform> _hookPos;
+
+    [Header("인게임 상황 관리용 필드")]
+    [SerializeField] int _generatorsToGetOut;    
+    
+    List<Generator> _generators = new List<Generator>();
+    List<Hook> _hooks = new List<Hook>();
+
 
     private GameObject _playerPrefab;
     private GameObject _localInstance;
@@ -75,10 +87,11 @@ public class InGameManager : MonoBehaviourPunCallbacks
             cam.LookAt = kc.GetCameraTarget();
         }
 
-        // ===== 발전기 스폰 (마스터만) =====
+        // ===== 상호작용 오브젝트 스폰 (마스터만) =====
         if (PhotonNetwork.IsMasterClient)
         {
             SpawnGenerator();
+            SpawnHook();
         }
 
         isReady = true;
@@ -87,12 +100,33 @@ public class InGameManager : MonoBehaviourPunCallbacks
 
     private void SpawnGenerator()
     {
-        PhotonNetwork.Instantiate(
-            _generatorPrefab.name,
-            new Vector3(10f, 0f, 10f),
-            Quaternion.identity
-        );
+        foreach (var pos in _generatorPos)
+        {
+            GameObject go = PhotonNetwork.Instantiate(_generatorPrefab.name, pos.position, pos.rotation);
+            _generators.Add(go.GetComponent<Generator>());
+        }
     }
+
+    // 발전기가 고쳐질 때마다 호출될 함수
+    public void OnGeneratorFixed()
+    {
+        _generatorsToGetOut--;
+        Debug.Log($"남은 발전기: {_generatorsToGetOut}");
+        if (_generatorsToGetOut <= 0)
+        {
+            Debug.Log("탈출구가 활성화되었습니다!");
+            // 탈출구 개방 로직
+        }
+    }
+    private void SpawnHook()
+    {
+        for (int i = 0; i < _hookPos.Count; i++)
+        {
+            _hooks.Add(PhotonNetwork.Instantiate(_hookPrefab.name, _hookPos[i].position, Quaternion.identity).GetComponent<Hook>());
+        }
+        
+    }
+
 
     public GameObject GetCharacterObject()
     {

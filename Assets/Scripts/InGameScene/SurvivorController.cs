@@ -23,7 +23,15 @@ public class SurvivorController : CharacterControllerBase, IPunObservable
 
         if (_cameraAnchor == null) _cameraAnchor = transform.GetChild(0);
     }
-
+    private void Update()
+    {
+        // 들려있는 상태(CanMove가 false인 상황 등)라면 부모의 위치에 강제 고정
+        if (_stateManager != null && !_stateManager.CanMove() && transform.parent != null)
+        {
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
+        }
+    }
     protected override void FixedUpdate()
     {
         if (_pv == null || !_pv.IsMine) return;
@@ -36,14 +44,28 @@ public class SurvivorController : CharacterControllerBase, IPunObservable
 
     public void SetPhysical(bool enable)
     {
-        // 들려있을 때는 물리 연산(Gravity 포함)이 꺼져야 함
         if (_rb != null)
         {
             _rb.isKinematic = !enable;
             _rb.useGravity = enable;
-            _rb.linearVelocity = Vector3.zero;
-            Pv.enabled = enable;
+
+            if (!enable) // 들렸을 때
+            {
+                _rb.linearVelocity = Vector3.zero;
+                _rb.angularVelocity = Vector3.zero;
+                // 중요: 보간을 끄지 않으면 이전 위치로 돌아가려는 관성이 남습니다.
+                _rb.interpolation = RigidbodyInterpolation.None;
+            }
+            else // 내려놓을 때
+            {
+                _rb.interpolation = RigidbodyInterpolation.Interpolate;
+            }
         }
+
+        // PhotonTransformView가 켜져 있으면 네트워크 위치 보정이 들어와서 행성 현상이 생깁니다.
+        var ptv = GetComponent<PhotonTransformView>();
+        if (ptv != null) ptv.enabled = enable;
+
         if (_capsuleCollider != null) _capsuleCollider.enabled = enable;
     }
 
@@ -87,26 +109,7 @@ public class SurvivorController : CharacterControllerBase, IPunObservable
     }
 
     [PunRPC] public void RPC_Hit() => _stateManager?.OnHit();
-
-    [PunRPC]
-    public void RPC_Lift(int liftPointViewId)
-    {
-        // 모든 클라이언트에서 동일하게 부모-자식 관계를 형성
-        PhotonView pointPv = PhotonView.Find(liftPointViewId);
-        if (pointPv == null)
-        {
-            // 갈고리 해제 혹은 내려놓기 시 (ID가 -1 등일 때)
-            transform.SetParent(null);
-            SetPhysical(true);
-            return;
-        }
-
-        SetPhysical(false);
-        transform.SetParent(pointPv.transform);
-        transform.localPosition = Vector3.zero;
-        transform.localRotation = Quaternion.identity;
-    }
-
+   
     protected override void MoveRogic()
     {
         if (!_pv.IsMine) return;

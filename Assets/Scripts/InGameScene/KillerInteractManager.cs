@@ -42,18 +42,18 @@ public class KillerInteractManager : MonoBehaviour
             StopInteract();
         }
     }
-
+    
     public void StartInteract()
     {
         if (Nearest == null) return;
 
         _currentInterectable = Nearest.GetComponentInParent<IKillerInteractable>();
-
         if (_currentInterectable == null || !_currentInterectable.IsKillerInteractable) return;
 
-        // 타겟 방향 바라보기 (들쳐업기/걸기 전 정렬)
-        Transform target = Nearest.transform.root;
-        _controller.LookAtTarget(target);
+        // 갈고리에 걸거나 생존자를 들 때 킬러가 대상을 바라보게 함
+        Vector3 lookPos = Nearest.transform.position;
+        lookPos.y = transform.position.y; // 높이는 유지
+        transform.LookAt(lookPos);
 
         _currentInterectable.StartKillerInteract(_controller);
     }

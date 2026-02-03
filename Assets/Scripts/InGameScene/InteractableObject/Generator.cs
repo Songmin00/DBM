@@ -1,9 +1,11 @@
 using Photon.Pun;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class Generator : MonoBehaviourPun, ISurvivorInteractable, IPunObservable
 {
-    private float _totalGauge = 80f;
+    public bool IsFixed { get; private set; } = false;
+    [SerializeField] float _totalGauge = 30f;
     private float _currentGauge = 0f;
     private int _fixingSurvivors = 0;
 
@@ -62,6 +64,7 @@ public class Generator : MonoBehaviourPun, ISurvivorInteractable, IPunObservable
     private void RPC_Fixed()
     {
         IsSurvivorInteractable = false;
+        IsFixed = true;
         Debug.Log("Fixed!!");
     }
 
@@ -69,11 +72,11 @@ public class Generator : MonoBehaviourPun, ISurvivorInteractable, IPunObservable
     {
         if (stream.IsWriting)
         {
-            stream.SendNext(_currentGauge);
+            stream.SendNext(_currentGauge);            
         }
         else
         {
-            _currentGauge = (float)stream.ReceiveNext();
+            _currentGauge = (float)stream.ReceiveNext();            
         }
     }
 }
