@@ -189,7 +189,7 @@ public class MatchingManager : MonoBehaviourPunCallbacks
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProp);
     }
 
-    // 4. 룸 프로퍼티 변경 감지 (이동 명령 수신)
+    // 룸 프로퍼티 변경 감지 (이동 명령 수신)
     public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
     {
         if (!propertiesThatChanged.ContainsKey("InGameRoomName")) return;
@@ -206,7 +206,6 @@ public class MatchingManager : MonoBehaviourPunCallbacks
                 }
             }
         }
-
         if (isMatched)
         {
             // 이동할 방 이름을 저장하고 현재 매칭룸 탈퇴
@@ -217,7 +216,7 @@ public class MatchingManager : MonoBehaviourPunCallbacks
     }
 
 
-    // 5. 매칭룸을 완전히 나갔을 때 실행    
+    // 매칭룸을 완전히 나갔을 때 실행    
     public override void OnLeftRoom()
     {
         // 취소 버튼을 눌러서 나가는 경우 _inGameRoomName이 null임
@@ -232,7 +231,7 @@ public class MatchingManager : MonoBehaviourPunCallbacks
         }
     }
 
-    // 6. 마스터 서버(로비 전 단계)에 다시 연결되었을 때 실행
+    // 마스터 서버(로비 전 단계)에 다시 연결되었을 때 실행
     public override void OnConnectedToMaster()
     {
         // 이동할 목적지 방 이름이 저장되어 있다면, 이때가 접속의 최적기임!
@@ -251,7 +250,7 @@ public class MatchingManager : MonoBehaviourPunCallbacks
         }
     }
 
-    // 7. 만약 입장 실패 시 에러 로그 확인용
+    //  만약 입장 실패 시 에러 로그 확인용
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
         _lobbyUIController.SetMatchingUIWhileMatching(false);
