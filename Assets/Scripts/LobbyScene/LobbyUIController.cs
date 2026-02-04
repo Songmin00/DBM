@@ -166,5 +166,8 @@ public class LobbyUIController : MonoBehaviour
         canvasGroup.alpha = visible ? 1f : 0f;        
     }
 
-
+    public void OnExitButtonClick()
+    {
+        Application.Quit();
+    }
 }
