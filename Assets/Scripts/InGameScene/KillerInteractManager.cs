@@ -24,12 +24,15 @@ public class KillerInteractManager : MonoBehaviour
     }
 
     private void OnTriggerEnter(Collider other)
-    {
-        // 태그 검사 로직 유지
+    {        
+        //Debug.Log($"트리거 진입: {other.name} | 태그: {other.tag}");
+
         if (!other.CompareTag("SurvivorInteractRange") && !other.CompareTag("Hook")) return;
+
         if (!_overlaps.Contains(other))
         {
             _overlaps.Add(other);
+            //Debug.Log($"관리 리스트에 추가됨: {other.name}");
         }
     }
 
@@ -50,9 +53,9 @@ public class KillerInteractManager : MonoBehaviour
         _currentInterectable = Nearest.GetComponentInParent<IKillerInteractable>();
         if (_currentInterectable == null || !_currentInterectable.IsKillerInteractable) return;
 
-        // 갈고리에 걸거나 생존자를 들 때 킬러가 대상을 바라보게 함
+        
         Vector3 lookPos = Nearest.transform.position;
-        lookPos.y = transform.position.y; // 높이는 유지
+        lookPos.y = transform.position.y;
         transform.LookAt(lookPos);
 
         _currentInterectable.StartKillerInteract(_controller);
@@ -73,14 +76,24 @@ public class KillerInteractManager : MonoBehaviour
         for (int i = _overlaps.Count - 1; i >= 0; i--)
         {
             Collider col = _overlaps[i];
-            if (col == null)
-            {
-                _overlaps.RemoveAt(i);
-                continue;
-            }
+            if (col == null) { _overlaps.RemoveAt(i); continue; }
 
             var interactable = col.GetComponentInParent<IKillerInteractable>();
             if (interactable == null || !interactable.IsKillerInteractable) continue;
+
+            
+            // 만약 생존자를 들고 있다면
+            bool isCarrying = _controller.GetLiftPoint().childCount > 0;
+
+            if (isCarrying)
+            {
+                if (!col.CompareTag("Hook")) continue;
+            }
+            else //안 들고 있다면
+            {                
+                if (col.CompareTag("Hook")) continue;
+            }
+            // -----------------------
 
             float dist = Vector3.SqrMagnitude(col.transform.position - transform.position);
             if (dist < minDist)
@@ -89,7 +102,6 @@ public class KillerInteractManager : MonoBehaviour
                 nearest = col;
             }
         }
-
         return nearest;
     }
 }

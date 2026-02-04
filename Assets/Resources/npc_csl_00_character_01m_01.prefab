@@ -4988,6 +4988,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8936a8e0ba8fed5478760ca541b17a67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorController
+  WalkSpeed: 2.26
+  RunSpeed: 4
+  SitSpeed: 1.13
+  DyingSpeed: 0.7
   _cameraAnchor: {fileID: 7708368655170084925}
 --- !u!114 &-4528598846524136651
 MonoBehaviour:

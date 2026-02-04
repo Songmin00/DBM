@@ -1,33 +1,48 @@
 using Photon.Pun;
 using UnityEngine;
 
-public class Hook : MonoBehaviour, IKillerInteractable
+public class Hook : MonoBehaviour, IKillerInteractable, ISurvivorInteractable
 {
-    [Header("생존자가 매달릴 지점")]
     [SerializeField] private Transform _hookPoint;
 
     public bool IsKillerInteractable { get; set; } = true;
+        
+    public bool IsSurvivorInteractable
+    {
+        get => true; // 항상 true로 두어 탐색 대상에 포함되게 함
+        set { }
+    }
+
+    public SurvivorStateManager OccupyingSurvivor { get; private set; }
+
+    private void Awake()
+    {
+        // 기본적으로 생존자가 구조할 수 있는 상태로 설정
+        IsSurvivorInteractable = true;
+    }
 
     public void StartKillerInteract(KillerController killer)
     {
-        // 킬러가 현재 누군가를 들고 있는지 확인 (보통 KillerController나 State에 저장)
-        // 여기서는 간단히 킬러의 자식 중 SurvivorController가 있는지 확인하는 방식으로 처리
         SurvivorController carriedSurvivor = killer.GetLiftPoint().GetComponentInChildren<SurvivorController>();
-
         if (carriedSurvivor != null)
         {
-            // 생존자에게 갈고리에 걸리라고 명령
-            var stateManager = carriedSurvivor.GetComponent<SurvivorStateManager>();
-            if (stateManager != null)
+            var pv = carriedSurvivor.GetComponent<PhotonView>();
+            if (pv != null)
             {
-                // 상태를 Hang으로 변경하고, 부모를 갈고리의 hookPoint로 변경
-                stateManager.RequestStateChange(SurvivorState.Hang, true);
-                stateManager.GetComponent<PhotonView>().RPC("RPC_AttachToHook", RpcTarget.All, _hookPoint.GetComponent<PhotonView>().ViewID);
+                OccupyingSurvivor = carriedSurvivor.GetComponent<SurvivorStateManager>();
+                pv.RPC("RPC_AttachToHook", RpcTarget.AllBuffered, GetComponent<PhotonView>().ViewID);
             }
-
-            Debug.Log("생존자를 갈고리에 걸었습니다.");
         }
     }
 
+    public void StartSurvivorInteract() { }
+    public void StopSurvivorInteract() { }
     public void StopKillerInteract() { }
+
+    public Transform GetHookPoint() => _hookPoint;
+
+    public void OnRescueComplete()
+    {
+        OccupyingSurvivor = null;
+    }
 }

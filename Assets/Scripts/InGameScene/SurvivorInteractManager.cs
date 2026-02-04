@@ -11,6 +11,7 @@ public class SurvivorInteractManager : MonoBehaviour
 
     // 현재 상호작용 중인 타겟 추적
     private int _currentTargetViewId = -1;
+    public int CurrentTargetViewId => _currentTargetViewId;
     private bool _currentTargetIsSurvivorState = false;
 
     private void Awake()
@@ -41,7 +42,7 @@ public class SurvivorInteractManager : MonoBehaviour
         _overlaps.Remove(other);
         Debug.Log("상호작용 대상 제거");
 
-        // 현재 타겟이 트리거 밖으로 나가면 Stop도 보내준다
+        // 현재 타겟이 트리거 밖으로 나가면 Stop도 보내주기
         if (_currentTargetViewId != -1)
         {
             PhotonView targetPv = PhotonView.Find(_currentTargetViewId);
@@ -52,34 +53,44 @@ public class SurvivorInteractManager : MonoBehaviour
         }
     }
 
+    
     public void StartInteract()
     {
         if (_pv == null || !_pv.IsMine) return;
         if (Nearest == null) return;
-
-        // Range 콜라이더는 자식일 가능성이 높음
+        
         PhotonView targetPv = Nearest.GetComponentInParent<PhotonView>();
         if (targetPv == null) return;
-
-        // 상호작용 가능 여부는 대상에서 판단
-        var interactable = Nearest.GetComponentInParent<ISurvivorInteractable>();
-        if (interactable == null) return;
-        if (!interactable.IsSurvivorInteractable) return;
+        
+        Hook hook = targetPv.GetComponent<Hook>();
+        if (hook != null)
+        {
+            if (hook.OccupyingSurvivor != null)
+            {                
+                targetPv = hook.OccupyingSurvivor.GetComponent<PhotonView>();
+            }
+            else
+            {                
+                return;
+            }
+        }
+        
+        var interactable = targetPv.GetComponent<ISurvivorInteractable>();
+        if (interactable == null || !interactable.IsSurvivorInteractable) return;
 
         _currentTargetViewId = targetPv.ViewID;
 
-        // 대상이 SurvivorStateManager(치료/구조)면: 대상 오너에게 RPC
         SurvivorStateManager state = targetPv.GetComponent<SurvivorStateManager>();
         if (state != null)
         {
-            _currentTargetIsSurvivorState = true;
-            targetPv.RPC(nameof(SurvivorStateManager.RPC_SurvivorInteractStart), targetPv.Owner, _pv.ViewID);
-            return;
+            _currentTargetIsSurvivorState = true;            
+            targetPv.RPC("RPC_SurvivorInteractStart", targetPv.Owner, _pv.ViewID);
         }
-
-        // 그 외(발전기 등)는: 로컬에서 Start 호출 → 내부에서 RPC 처리하도록(Generator 방식)
-        _currentTargetIsSurvivorState = false;
-        interactable.StartSurvivorInteract();
+        else
+        {
+            _currentTargetIsSurvivorState = false;
+            interactable.StartSurvivorInteract();
+        }
     }
 
     public void StopInteract()
