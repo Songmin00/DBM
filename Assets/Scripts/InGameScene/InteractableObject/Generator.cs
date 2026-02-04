@@ -63,9 +63,26 @@ public class Generator : MonoBehaviourPun, ISurvivorInteractable, IPunObservable
     [PunRPC]
     private void RPC_Fixed()
     {
+        if (IsFixed) return;
+
         IsSurvivorInteractable = false;
         IsFixed = true;
-        Debug.Log("Fixed!!");
+        Debug.Log("Generator Fixed!!");
+
+        if (InGameManager.Instance != null)
+            InGameManager.Instance.OnGeneratorFixed();
+
+        
+        var localPlayer = InGameManager.Instance.GetCharacterObject();
+        if (localPlayer != null)
+        {
+            var interactManager = localPlayer.GetComponent<SurvivorInteractManager>();
+            if (interactManager.CurrentTargetViewId == photonView.ViewID)
+            {
+                localPlayer.GetComponent<SurvivorController>().Interact(false);
+            }
+        }
+        SoundManager.Instance.PlaySFX("RepairSound", 0.7f);
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)

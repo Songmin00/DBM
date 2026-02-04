@@ -42,9 +42,14 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
+        SetPhotonNickname();
         Debug.Log("로비 연결 완료. 로비 씬으로 이동합니다.");
         IsJoinedLobby = true;
     }
 
-    
+    public void SetPhotonNickname()
+    {
+        // SaveManager의 이름을 포톤 네트워크 이름으로 동기화
+        PhotonNetwork.NickName = SaveManager.Instance.User.DisplayName;
+    }
 }
