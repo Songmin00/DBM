@@ -13,10 +13,6 @@ public class CharacterControllerBase : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody>();
 
-        // 물리 회전 차단 (X, Z)
-        _rb.constraints = RigidbodyConstraints.FreezeRotationX
-                        | RigidbodyConstraints.FreezeRotationZ;
-
         // 마찰로 인한 미세 회전 방지
         _rb.angularDamping = 0f;
     }
@@ -25,7 +21,7 @@ public class CharacterControllerBase : MonoBehaviour
     {
         if (!IsMine) return;
 
-        // ★ 핵심: 외부 충돌로 인한 뱅글뱅글 회전 강제 차단
+        // 외부 충돌로 인한 회전 강제 차단
         _rb.angularVelocity = Vector3.zero;
     }
 

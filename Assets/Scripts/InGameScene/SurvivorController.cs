@@ -3,6 +3,12 @@ using UnityEngine;
 
 public class SurvivorController : CharacterControllerBase, IPunObservable
 {
+    [Header("이동속도 스탯")]
+    public float WalkSpeed = 2.26f;
+    public float RunSpeed = 4f;
+    public float SitSpeed = 1.13f;
+    public float DyingSpeed = 0.7f;
+
     [SerializeField] Transform _cameraAnchor;
     private SurvivorStateManager _stateManager;
     private SurvivorInteractManager _interactManager;
@@ -49,37 +55,43 @@ public class SurvivorController : CharacterControllerBase, IPunObservable
             _rb.isKinematic = !enable;
             _rb.useGravity = enable;
 
-            if (!enable) // 들렸을 때
+            if (!enable)
             {
                 _rb.linearVelocity = Vector3.zero;
                 _rb.angularVelocity = Vector3.zero;
-                // 중요: 보간을 끄지 않으면 이전 위치로 돌아가려는 관성이 남습니다.
                 _rb.interpolation = RigidbodyInterpolation.None;
+                _rb.constraints = RigidbodyConstraints.FreezeAll;
             }
-            else // 내려놓을 때
+            else
             {
                 _rb.interpolation = RigidbodyInterpolation.Interpolate;
+                _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
             }
         }
-
-        // PhotonTransformView가 켜져 있으면 네트워크 위치 보정이 들어와서 행성 현상이 생깁니다.
+        
         var ptv = GetComponent<PhotonTransformView>();
-        if (ptv != null) ptv.enabled = enable;
-
-        if (_capsuleCollider != null) _capsuleCollider.enabled = enable;
+        if (ptv != null)
+        {
+            ptv.enabled = enable;
+        }
+        if (_capsuleCollider != null)
+        {
+            _capsuleCollider.enabled = enable;
+        }
     }
 
     public void Run(bool running)
     {
         if (!_pv.IsMine || (_stateManager != null && (!_stateManager.CanMove() || _stateManager.IsSitting))) return;
-        SetMoveSpeed(running ? 6f : 4f);
+        if (_stateManager.CurrentState != SurvivorState.None && _stateManager.CurrentState != SurvivorState.Hurt) return;
+        SetMoveSpeed(running ? RunSpeed : WalkSpeed);
     }
 
     public void Sit(bool sit)
     {
         if (!_pv.IsMine) return;
         if (_stateManager != null) _stateManager.SetSitting(sit);
-        SetMoveSpeed(sit ? 2f : 4f);
+        SetMoveSpeed(sit ? SitSpeed : WalkSpeed);
     }
 
     public void Interact(bool interact)
@@ -108,7 +120,12 @@ public class SurvivorController : CharacterControllerBase, IPunObservable
         _rb.MoveRotation(Quaternion.LookRotation(dir, Vector3.up));
     }
 
-    [PunRPC] public void RPC_Hit() => _stateManager?.OnHit();
+    [PunRPC]
+    public void RPC_Hit()
+    {
+        _stateManager?.OnHit();
+    }
+    
    
     protected override void MoveRogic()
     {
@@ -143,4 +160,5 @@ public class SurvivorController : CharacterControllerBase, IPunObservable
             if (_animator != null) _animator.SetFloat("Speed", _currentAnimSpeed);
         }
     }
+
 }

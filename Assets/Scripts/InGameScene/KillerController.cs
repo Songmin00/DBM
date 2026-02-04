@@ -37,14 +37,14 @@ public class KillerController : CharacterControllerBase, IPunObservable
     {
         if (!IsMine) return;
 
-        // 마우스 회전은 Update에서 처리해야 부드러움
+        // 마우스 회전은 Update에서 처리
         LookUpdate();
     }
 
     protected override void FixedUpdate()
     {
         if (!IsMine) return;
-        base.FixedUpdate(); // angularVelocity 초기화 실행
+        base.FixedUpdate(); // 외부회전 막기
         MoveRogic();
     }
 
@@ -71,14 +71,13 @@ public class KillerController : CharacterControllerBase, IPunObservable
     public void Attack()
     {
         if (!IsMine || _isAttacking) return;
+        SoundManager.Instance.PlaySFX("AttackSound", 0.6f);
         _isAttacking = true;
         _animator.SetBool("IsAttack", true);
     }
 
     public void OnAttackHit()
     {
-        // 피격 판정은 마스터 클라이언트 혹은 공격자 본인이 판정 (서버 구조에 따라 다름)
-        // 여기서는 기존 로직대로 MasterClient가 판정하도록 유지
         if (!PhotonNetwork.IsMasterClient) return;
 
         _isDelaying = true;
